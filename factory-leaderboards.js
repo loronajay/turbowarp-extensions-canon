@@ -1,0 +1,314 @@
+(function(Scratch) {
+    "use strict";
+
+    if (!Scratch.extensions.unsandboxed) {
+        throw new Error("Factory Leaderboards must run unsandboxed");
+    }
+
+    const boards = {};
+
+    function ensureBoard(name) {
+        if (!boards[name]) {
+            boards[name] = {
+                entries: [],
+                maxEntries: 10,
+                sortMode: "desc" // desc = descending, asc = ascending
+            };
+        }
+        return boards[name];
+    }
+
+    function getBoard(name) {
+        return boards[name] || null;
+    }
+
+    function sortBoard(board) {
+        board.entries.sort((a, b) => {
+            if (board.sortMode === "asc") {
+                return a.value - b.value;
+            } else {
+                return b.value - a.value;
+            }
+        });
+    }
+
+    function trimBoard(board) {
+        if (board.entries.length > board.maxEntries) {
+            board.entries.length = board.maxEntries;
+        }
+    }
+
+    class FactoryLeaderboards {
+        getInfo() {
+            return {
+                id: "factoryleaderboards",
+                name: "Factory Leaderboards",
+                blocks: [
+
+                    // Setup
+                    {
+                        opcode: "createLeaderboard",
+                        blockType: Scratch.BlockType.COMMAND,
+                        text: "create leaderboard [NAME]",
+                        arguments: {
+                            NAME: { type: Scratch.ArgumentType.STRING, defaultValue: "High Scores" }
+                        }
+                    },
+                    {
+                        opcode: "deleteLeaderboard",
+                        blockType: Scratch.BlockType.COMMAND,
+                        text: "delete leaderboard [NAME]",
+                        arguments: {
+                            NAME: { type: Scratch.ArgumentType.STRING, defaultValue: "High Scores" }
+                        }
+                    },
+                    {
+                        opcode: "deleteAllLeaderboards",
+                        blockType: Scratch.BlockType.COMMAND,
+                        text: "delete all leaderboards"
+                    },
+                    {
+                        opcode: "setMaxEntries",
+                        blockType: Scratch.BlockType.COMMAND,
+                        text: "set leaderboard [NAME] max entries to [NUM]",
+                        arguments: {
+                            NAME: { type: Scratch.ArgumentType.STRING, defaultValue: "High Scores" },
+                            NUM: { type: Scratch.ArgumentType.NUMBER, defaultValue: 10 }
+                        }
+                    },
+                    {
+                        opcode: "setSortMode",
+                        blockType: Scratch.BlockType.COMMAND,
+                        text: "set leaderboard [NAME] sort mode to [MODE]",
+                        arguments: {
+                            NAME: { type: Scratch.ArgumentType.STRING, defaultValue: "High Scores" },
+                            MODE: {
+                                type: Scratch.ArgumentType.STRING,
+                                menu: "sortMode"
+                            }
+                        }
+                    },
+
+                    // Entry
+                    {
+                        opcode: "addEntry",
+                        blockType: Scratch.BlockType.COMMAND,
+                        text: "add entry name [PLAYER] value [VALUE] to leaderboard [NAME]",
+                        arguments: {
+                            PLAYER: { type: Scratch.ArgumentType.STRING, defaultValue: "AAA" },
+                            VALUE: { type: Scratch.ArgumentType.NUMBER, defaultValue: 100 },
+                            NAME: { type: Scratch.ArgumentType.STRING, defaultValue: "High Scores" }
+                        }
+                    },
+                    {
+                        opcode: "clearLeaderboard",
+                        blockType: Scratch.BlockType.COMMAND,
+                        text: "clear leaderboard [NAME]",
+                        arguments: {
+                            NAME: { type: Scratch.ArgumentType.STRING, defaultValue: "High Scores" }
+                        }
+                    },
+                    {
+                        opcode: "trimLeaderboard",
+                        blockType: Scratch.BlockType.COMMAND,
+                        text: "trim leaderboard [NAME]",
+                        arguments: {
+                            NAME: { type: Scratch.ArgumentType.STRING, defaultValue: "High Scores" }
+                        }
+                    },
+
+                    // Logic
+                    {
+                        opcode: "qualifies",
+                        blockType: Scratch.BlockType.BOOLEAN,
+                        text: "value [VALUE] qualifies for leaderboard [NAME] ?",
+                        arguments: {
+                            VALUE: { type: Scratch.ArgumentType.NUMBER, defaultValue: 100 },
+                            NAME: { type: Scratch.ArgumentType.STRING, defaultValue: "High Scores" }
+                        }
+                    },
+                    {
+                        opcode: "getRank",
+                        blockType: Scratch.BlockType.REPORTER,
+                        text: "get rank for value [VALUE] in leaderboard [NAME]",
+                        arguments: {
+                            VALUE: { type: Scratch.ArgumentType.NUMBER, defaultValue: 100 },
+                            NAME: { type: Scratch.ArgumentType.STRING, defaultValue: "High Scores" }
+                        }
+                    },
+                    {
+                        opcode: "isFull",
+                        blockType: Scratch.BlockType.BOOLEAN,
+                        text: "leaderboard [NAME] is full ?",
+                        arguments: {
+                            NAME: { type: Scratch.ArgumentType.STRING, defaultValue: "High Scores" }
+                        }
+                    },
+
+                    // Retrieval
+                    {
+                        opcode: "entryCount",
+                        blockType: Scratch.BlockType.REPORTER,
+                        text: "entry count of leaderboard [NAME]",
+                        arguments: {
+                            NAME: { type: Scratch.ArgumentType.STRING, defaultValue: "High Scores" }
+                        }
+                    },
+                    {
+                        opcode: "getName",
+                        blockType: Scratch.BlockType.REPORTER,
+                        text: "name at rank [RANK] in leaderboard [NAME]",
+                        arguments: {
+                            RANK: { type: Scratch.ArgumentType.NUMBER, defaultValue: 1 },
+                            NAME: { type: Scratch.ArgumentType.STRING, defaultValue: "High Scores" }
+                        }
+                    },
+                    {
+                        opcode: "getValue",
+                        blockType: Scratch.BlockType.REPORTER,
+                        text: "value at rank [RANK] in leaderboard [NAME]",
+                        arguments: {
+                            RANK: { type: Scratch.ArgumentType.NUMBER, defaultValue: 1 },
+                            NAME: { type: Scratch.ArgumentType.STRING, defaultValue: "High Scores" }
+                        }
+                    },
+
+                    // Utility
+                    {
+                        opcode: "exists",
+                        blockType: Scratch.BlockType.BOOLEAN,
+                        text: "leaderboard [NAME] exists ?",
+                        arguments: {
+                            NAME: { type: Scratch.ArgumentType.STRING, defaultValue: "High Scores" }
+                        }
+                    },
+                    {
+                        opcode: "hasEntries",
+                        blockType: Scratch.BlockType.BOOLEAN,
+                        text: "has entries in leaderboard [NAME] ?",
+                        arguments: {
+                            NAME: { type: Scratch.ArgumentType.STRING, defaultValue: "High Scores" }
+                        }
+                    }
+                ],
+                menus: {
+                    sortMode: {
+                        acceptReporters: true,
+                        items: [
+                            { text: "descending", value: "desc" },
+                            { text: "ascending", value: "asc" }
+                        ]
+                    }
+                }
+            };
+        }
+
+        createLeaderboard({ NAME }) {
+            ensureBoard(NAME);
+        }
+
+        deleteLeaderboard({ NAME }) {
+            delete boards[NAME];
+        }
+
+        deleteAllLeaderboards() {
+            for (let key in boards) delete boards[key];
+        }
+
+        setMaxEntries({ NAME, NUM }) {
+            const board = ensureBoard(NAME);
+            board.maxEntries = Math.max(1, Math.floor(NUM));
+            trimBoard(board);
+        }
+
+        setSortMode({ NAME, MODE }) {
+            const board = ensureBoard(NAME);
+            board.sortMode = MODE === "asc" ? "asc" : "desc";
+            sortBoard(board);
+        }
+
+        addEntry({ PLAYER, VALUE, NAME }) {
+            const board = ensureBoard(NAME);
+            board.entries.push({ name: PLAYER, value: Number(VALUE) || 0 });
+            sortBoard(board);
+            trimBoard(board);
+        }
+
+        clearLeaderboard({ NAME }) {
+            const board = ensureBoard(NAME);
+            board.entries = [];
+        }
+
+        trimLeaderboard({ NAME }) {
+            const board = ensureBoard(NAME);
+            trimBoard(board);
+        }
+
+        qualifies({ VALUE, NAME }) {
+            const board = getBoard(NAME);
+            const value = Number(VALUE) || 0;
+
+            if (!board) return false;
+
+            if (board.entries.length < board.maxEntries) return true;
+
+            const last = board.entries[board.entries.length - 1];
+            return board.sortMode === "asc"
+                ? value < last.value
+                : value > last.value;
+        }
+
+        getRank({ VALUE, NAME }) {
+            const board = getBoard(NAME);
+            const value = Number(VALUE) || 0;
+
+            if (!board) return 0;
+
+            for (let i = 0; i < board.entries.length; i++) {
+                if (
+                    (board.sortMode === "asc" && value < board.entries[i].value) ||
+                    (board.sortMode === "desc" && value > board.entries[i].value)
+                ) {
+                    return i + 1;
+                }
+            }
+            return board.entries.length + 1;
+        }
+
+        isFull({ NAME }) {
+            const board = getBoard(NAME);
+            if (!board) return false;
+            return board.entries.length >= board.maxEntries;
+        }
+
+        entryCount({ NAME }) {
+            const board = getBoard(NAME);
+            return board ? board.entries.length : 0;
+        }
+
+        getName({ RANK, NAME }) {
+            const board = getBoard(NAME);
+            if (!board) return "";
+            const entry = board.entries[RANK - 1];
+            return entry ? entry.name : "";
+        }
+
+        getValue({ RANK, NAME }) {
+            const board = getBoard(NAME);
+            if (!board) return 0;
+            const entry = board.entries[RANK - 1];
+            return entry ? entry.value : 0;
+        }
+
+        exists({ NAME }) {
+            return !!boards[NAME];
+        }
+
+        hasEntries({ NAME }) {
+            const board = getBoard(NAME);
+            return !!(board && board.entries.length > 0);
+        }
+    }
+
+    Scratch.extensions.register(new FactoryLeaderboards());
+})(Scratch);

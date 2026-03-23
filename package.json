@@ -1,0 +1,21 @@
+{
+  "name": "canon",
+  "private": true,
+  "scripts": {
+    "test": "jest",
+    "build:blockify": "node scripts/build-blockify-embedded.mjs"
+  },
+  "jest": {
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ]
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.4",
+    "jest": "^30.3.0"
+  },
+  "dependencies": {
+    "blockly": "^12.5.1",
+    "scratch-blocks": "^2.1.4"
+  }
+}
