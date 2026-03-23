@@ -74,6 +74,34 @@ Current supported operations:
 - `rename_variable`
 - `detach_top_level_scripts`
 
+## Canonical AI Mutation Samples
+
+Canonical benchmark-style mutation samples are documented in:
+
+- [AI_MUTATION_BENCHMARKS.md](/Users/leoja/Desktop/Dad%20Games/turbowarp-extensions-js/canon/AI_MUTATION_BENCHMARKS.md)
+- [GOOGLE_AI_ROUNDTRIP_HISTORY.md](/Users/leoja/Desktop/Dad%20Games/turbowarp-extensions-js/canon/GOOGLE_AI_ROUNDTRIP_HISTORY.md)
+
+These record nontrivial LLM mutation tasks that go beyond simple scalar edits, including:
+
+- stack reordering
+- nested control restructuring
+- empty substacks
+- promotion/demotion of commands across stack levels
+
+They should be treated as reusable evidence samples, not yet as a formal scored benchmark harness.
+
+## Architecture Boundary
+
+The current architectural boundary between structural core and Scratch/TurboWarp adapter detail is documented in:
+
+- [ARCHITECTURE_BOUNDARIES.md](/Users/leoja/Desktop/Dad%20Games/turbowarp-extensions-js/canon/ARCHITECTURE_BOUNDARIES.md)
+
+This file should be used as the canonical record for:
+
+- what is currently core
+- what is currently adapter-specific
+- how to think about future abstraction without destabilizing the current system
+
 Current behavior:
 
 - patching is applied to parsed AST, not raw text directly
@@ -130,4 +158,3 @@ Most likely next directions:
 2. Improve patch workbench UX for faster testing.
 3. Introduce project-level operations after script-level patching is mature.
 4. Add diagnostics/linting as a separate layer from patching.
-
