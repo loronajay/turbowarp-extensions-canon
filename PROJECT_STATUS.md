@@ -103,6 +103,8 @@ ChatGPT round 1 (2026-03-24): **8/8 pass** across parse, validate, and structura
 
 Claude Sonnet 4.6 round 1 (2026-03-24): **partial** — 2/4 pass before Poe credits ran out. Test 3 failed: Claude produced unquoted string literals (`[literal:string:looping]` instead of `[literal:string:"looping"]`), causing a parse error. Tests 5–8 not reached. Testing to resume. See `CLAUDE_ROUNDTRIP_HISTORY.md`.
 
+Google Gemini 3 v2 behavioral round 1 (2026-03-24): **partial** — tests 1–2 clean pass from behavioral prompts alone. Test 3 parsed/validated but Blockify fell back to the fallback renderer (under investigation). Test 4 showed unintended threshold adjustment (50→49) on operator swap from behavioral description. Tests 5–8 not reached. See `GOOGLE_AI_ROUNDTRIP_HISTORY.md`.
+
 ## Architecture Boundary
 
 The current architectural boundary between structural core and Scratch/TurboWarp adapter detail is documented in:

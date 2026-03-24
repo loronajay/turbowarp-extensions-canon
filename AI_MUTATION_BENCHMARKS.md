@@ -302,6 +302,20 @@ The IR grammar requires string literal values to be enclosed in double quotes. N
 
 **Implication:** When evaluating model output on IR-B tests, check that string literals are properly quoted before treating a result as passing. This failure mode may appear across models, not only Claude.
 
+### Finding 5: Behavioral prompts are successfully interpreted by models (2026-03-24)
+
+Google Gemini 3 correctly inferred the required structural mutations from natural language behavioral descriptions on tests 1 and 2 of the v2 ledger — renaming the variable to something descriptive, and moving the counter outside the condition block — without any opcode-level guidance in the prompt.
+
+This is the first evidence that models can bridge from behavioral intent to correct IR structure. It suggests the IR grammar is expressive enough that models can reason about behavior and produce the appropriate structural output.
+
+**Implication:** Behavioral prompts are a viable mutation request style. They more closely reflect how a non-technical user would describe a change, and they test a different capability than direct structural prompts.
+
+### Finding 6: Operator-swap behavioral prompts may cause unintended threshold adjustment (2026-03-24)
+
+When Google Gemini 3 was asked to make a position check "pass when the sprite has gone past the target" (v2 test 4), it changed the operator from `operator_equals` to `operator_gt` as intended, but also changed `OPERAND2` from `[literal:number:50]` to `[literal:number:49]`. The model interpreted "gone past 50" as "> 49", which is mathematically equivalent for integers but violates the structural invariant that literal values should remain unchanged unless explicitly requested.
+
+**Implication:** Behavioral prompts that ask for comparison direction changes should explicitly state that the threshold value must not change. Example addition: "adjust the comparison direction only — keep the target value the same."
+
 ## Current Significance
 
 These benchmark cases matter because they go beyond scalar edits. They test:

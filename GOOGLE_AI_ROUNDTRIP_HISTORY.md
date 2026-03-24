@@ -561,6 +561,42 @@ The session context bleed finding is the only meaningful limitation observed.
 
 ---
 
+## Round 3 — 2026-03-24 (AI Model Test Ledger v2 — Behavioral Prompts, Partial)
+
+### Setup
+
+- **Model:** Google Gemini 3
+- **Date:** 2026-03-24
+- **Tooling:** `copy rules with IR buffer` block in Blockify embedded renderer
+- **Test source:** `ai-model-test-ledger-v2.html` — 8 behavioral prompt tests across IR-A and IR-B
+- **Note:** Prompts describe intended behavior rather than direct structural operations. Testing stopped at test 4.
+
+### Results Summary
+
+| Test | Description | Parses | Validates | Achieved | Notes |
+|------|-------------|--------|-----------|----------|-------|
+| 1 | Rename tracked variable | pass | pass | yes | — |
+| 2 | Make counter unconditional | pass | pass | yes | — |
+| 3 | Add visual signal on condition | pass | pass | yes | Blockify fell back to fallback renderer — under investigation |
+| 4 | Make position check less strict | — | — | — | Unintended change: literal value changed 50→49 — see below |
+| 5–8 | — | — | — | — | Not reached |
+
+### Test 3 — Fallback Renderer
+
+The IR parsed and validated successfully, but the Blockify embedded scratch-blocks renderer fell back to the plain-text fallback renderer. The structural mutation was achieved, but visual output was not rendered as real block images. Root cause is under investigation — likely an unsupported opcode or input shape in the model's output that the embedded renderer does not yet handle.
+
+### Test 4 — Threshold Adjustment
+
+When asked to make the position check "pass when the sprite has gone past the target", the model correctly switched from `operator_equals` to `operator_gt` but also changed `OPERAND2` from `[literal:number:50]` to `[literal:number:49]`. The reasoning is interpretable — `> 49` is mathematically equivalent to `>= 50` for integers — but it violates the structural invariant that the literal value should remain unchanged. Verdicts were left blank pending further review.
+
+This is the first recorded case of a model making a semantically reasonable but structurally unintended change in response to a behavioral prompt.
+
+### Round 3 Significance
+
+Round 3 is the first behavioral prompt test run. Tests 1 and 2 passing cleanly is meaningful — the model correctly inferred the required structural operations from natural language descriptions of desired behavior without any opcode-level guidance. The fallback renderer on test 3 and the threshold adjustment on test 4 are the first friction points observed with behavioral prompts.
+
+---
+
 ## Historical Takeaway
 
 These Google Gemini (current) tests matter because they were not limited to simple renames or scalar edits.
