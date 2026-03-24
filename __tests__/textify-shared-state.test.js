@@ -398,3 +398,86 @@ describe('Blockify copyRulesWithExportedIR', () => {
     expect(block.text).toBe('copy rules with exported IR');
   });
 });
+
+// ---------------------------------------------------------------------------
+// copyRulesWithIR block method tests
+// ---------------------------------------------------------------------------
+
+describe('Blockify copyRulesWithIR', () => {
+  test('copies "no copied IR" when IR argument is empty', async () => {
+    const writeText = jest.fn().mockResolvedValue(undefined);
+    const { extension } = loadExtension('blockify-turbowarp.js', {
+      globals: makeBlockifyGlobals(writeText)
+    });
+
+    await extension.copyRulesWithIR({ IR: '' });
+
+    expect(writeText).toHaveBeenCalledWith('no copied IR');
+  });
+
+  test('copies "no copied IR" when IR argument is not valid IR', async () => {
+    const writeText = jest.fn().mockResolvedValue(undefined);
+    const { extension } = loadExtension('blockify-turbowarp.js', {
+      globals: makeBlockifyGlobals(writeText)
+    });
+
+    await extension.copyRulesWithIR({ IR: 'some random text' });
+
+    expect(writeText).toHaveBeenCalledWith('no copied IR');
+  });
+
+  test('copies rules + IR when given valid [procedure IR', async () => {
+    const ir = '[procedure proccode:"my block" argumentnames:[] argumentdefaults:[] warp:false body:[stack:]]';
+    const writeText = jest.fn().mockResolvedValue(undefined);
+    const { extension } = loadExtension('blockify-turbowarp.js', {
+      globals: makeBlockifyGlobals(writeText)
+    });
+
+    await extension.copyRulesWithIR({ IR: ir });
+
+    const copied = writeText.mock.calls[0][0];
+    expect(copied).toContain('You are modifying Textify canon IR.');
+    expect(copied).toContain('IR:');
+    expect(copied).toContain(ir);
+  });
+
+  test('copies rules + IR when given valid [script IR', async () => {
+    const ir = '[script body:[stack:]]';
+    const writeText = jest.fn().mockResolvedValue(undefined);
+    const { extension } = loadExtension('blockify-turbowarp.js', {
+      globals: makeBlockifyGlobals(writeText)
+    });
+
+    await extension.copyRulesWithIR({ IR: ir });
+
+    const copied = writeText.mock.calls[0][0];
+    expect(copied).toContain('You are modifying Textify canon IR.');
+    expect(copied).toContain(ir);
+  });
+
+  test('copyRulesWithIR works independently of __TEXTIFY_SHARED__', async () => {
+    const ir = '[procedure proccode:"x" argumentnames:[] argumentdefaults:[] warp:false body:[stack:]]';
+    const writeText = jest.fn().mockResolvedValue(undefined);
+    // No __TEXTIFY_SHARED__ set — shared state is absent
+    const { extension } = loadExtension('blockify-turbowarp.js', {
+      globals: makeBlockifyGlobals(writeText)
+    });
+
+    await extension.copyRulesWithIR({ IR: ir });
+
+    const copied = writeText.mock.calls[0][0];
+    expect(copied).toContain(ir);
+  });
+
+  test('copyRulesWithIR is exposed as a block in getInfo() with IR argument', () => {
+    const { extension } = loadExtension('blockify-turbowarp.js', {
+      globals: makeBlockifyGlobals()
+    });
+    const info = extension.getInfo();
+    const block = info.blocks.find(b => b.opcode === 'copyRulesWithIR');
+    expect(block).toBeDefined();
+    expect(block.blockType).toBe('command');
+    expect(block.text).toBe('copy rules with IR [IR]');
+    expect(block.arguments.IR).toBeDefined();
+  });
+});

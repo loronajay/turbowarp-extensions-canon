@@ -24921,6 +24921,17 @@ ${owner.lastVisualCssStatus}` : "\n\nVISUAL CSS:\n[none]";
               opcode: "copyRulesWithExportedIR",
               blockType: Scratch2.BlockType.COMMAND,
               text: "copy rules with exported IR"
+            },
+            {
+              opcode: "copyRulesWithIR",
+              blockType: Scratch2.BlockType.COMMAND,
+              text: "copy rules with IR [IR]",
+              arguments: {
+                IR: {
+                  type: Scratch2.ArgumentType.STRING,
+                  defaultValue: ""
+                }
+              }
             }
           ]
         };
@@ -25021,6 +25032,14 @@ ${owner.lastVisualCssStatus}` : "\n\nVISUAL CSS:\n[none]";
           return false;
         }
         return copyTextToClipboard(this.lastPatchedIR);
+      }
+      async copyRulesWithIR(args) {
+        const ir = String(args.IR ?? "").trim();
+        if (!ir.startsWith("[procedure") && !ir.startsWith("[script")) {
+          await copyTextToClipboard("no copied IR");
+          return;
+        }
+        await copyTextToClipboard(`${AI_MUTATION_RULES}${ir}`);
       }
       async copyRulesWithExportedIR() {
         if (!hasValidExportedIR()) {
