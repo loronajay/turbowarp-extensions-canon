@@ -500,7 +500,16 @@
 
 <div class="page-header">
   <h1>AI Model Test Ledger</h1>
-  <p class="page-subtitle">Textify → AI → Blockify mutation evaluation. Data is saved automatically to localStorage.</p>
+  <p class="page-subtitle">Textify → AI → Blockify mutation evaluation. Text auto-saves to localStorage. Use Export to back up data including images.</p>
+  <div style="margin-top:.85rem;display:flex;gap:.6rem;flex-wrap:wrap;align-items:center">
+    <button onclick="exportAllData()" style="background:#1e2d40;border:1px solid #3b5268;color:#7dd3fc;border-radius:6px;padding:.35rem .9rem;font-size:.82rem;cursor:pointer">Export JSON</button>
+    <label style="background:#1e2540;border:1px solid #2d3748;color:#94a3b8;border-radius:6px;padding:.35rem .9rem;font-size:.82rem;cursor:pointer">
+      Import JSON<input type="file" accept=".json" style="display:none" onchange="importAllData(this.files[0])">
+    </label>
+  </div>
+  <div id="storage-warning" style="display:none;margin-top:.75rem;background:#3d1505;border:1px solid #92400e;border-radius:6px;padding:.6rem .9rem;font-size:.82rem;color:#fbbf24">
+    ⚠ Storage quota exceeded — text fields are saved but one or more images could not be stored. Use <strong>Export JSON</strong> to save a full backup including images.
+  </div>
 </div>
 
 <!-- Tests injected by JS -->
@@ -525,7 +534,7 @@
       <tbody id="summary-body"></tbody>
     </table>
   </div>
-  <p class="save-notice">All entries auto-save to localStorage. Clear browser storage to reset.</p>
+  <p class="save-notice">Text auto-saves to localStorage. Images are stored separately and may be lost if storage is full — use Export JSON to keep a complete backup. Import JSON to restore.</p>
 </div>
 
 <script>
@@ -757,18 +766,57 @@ Do not change any block ids, fields, or inputs.`,
 // Storage helpers
 // ─────────────────────────────────────────────
 
-function storageKey(testId) {
-  return `ledger_${testId}`;
+function storageKey(testId) { return `ledger_${testId}`; }
+function imageKey(testId, index) { return `ledger_img_${testId}_${index}`; }
+
+let _quotaWarned = false;
+function showQuotaWarning() {
+  if (_quotaWarned) return;
+  _quotaWarned = true;
+  const el = document.getElementById('storage-warning');
+  if (el) el.style.display = 'block';
 }
 
+function trySave(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22) showQuotaWarning();
+    return false;
+  }
+}
+
+// Text fields saved separately from images so a large image never blocks text saves.
 function loadResults(testId) {
   try {
-    return JSON.parse(localStorage.getItem(storageKey(testId))) || [];
+    const rows = JSON.parse(localStorage.getItem(storageKey(testId))) || [];
+    return rows.map((r, i) => ({
+      ...r,
+      image: localStorage.getItem(imageKey(testId, i)) || ''
+    }));
   } catch { return []; }
 }
 
 function saveResults(testId, results) {
-  localStorage.setItem(storageKey(testId), JSON.stringify(results));
+  // Save text fields (strip image — stored separately)
+  const rows = results.map(({ image, ...rest }) => rest);
+  trySave(storageKey(testId), JSON.stringify(rows));
+  // Save images individually; failure only affects that one image
+  results.forEach((r, i) => {
+    if (r.image) {
+      trySave(imageKey(testId, i), r.image);
+    } else {
+      try { localStorage.removeItem(imageKey(testId, i)); } catch {}
+    }
+  });
+  // Remove stale image keys beyond current count
+  for (let i = results.length; i < results.length + 10; i++) {
+    const k = imageKey(testId, i);
+    if (localStorage.getItem(k) !== null) {
+      try { localStorage.removeItem(k); } catch {}
+    } else break;
+  }
 }
 
 function readEntry(entryEl) {
@@ -789,6 +837,37 @@ function saveAllEntries(testId, listEl) {
   const entries = [...listEl.querySelectorAll('.result-entry')].map(readEntry);
   saveResults(testId, entries);
   rebuildSummary();
+}
+
+// ─────────────────────────────────────────────
+// Export / Import
+// ─────────────────────────────────────────────
+
+function exportAllData() {
+  const data = {};
+  TESTS.forEach(t => { data[t.id] = loadResults(t.id); });
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `ledger-export-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importAllData(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      TESTS.forEach(t => {
+        if (Array.isArray(data[t.id])) saveResults(t.id, data[t.id]);
+      });
+      location.reload();
+    } catch {
+      alert('Import failed: invalid JSON file.');
+    }
+  };
+  reader.readAsText(file);
 }
 
 // ─────────────────────────────────────────────
