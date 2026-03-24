@@ -17,13 +17,16 @@ This repo is now beyond simple export/render tooling. It currently supports:
 The intended workflow right now is:
 
 1. Use `Textify` to export a custom block or top-level stack to IR.
-2. Give that IR to an AI model.
-3. Have the model produce patch JSON or edited IR.
-4. Open `Blockify`.
-5. Paste source IR into `Source IR`.
-6. Paste patch JSON into `Patch JSON`.
-7. Apply patch and inspect the visual result.
-8. Copy the patched IR or use it as the new source.
+2. Use Blockify's **`copy rules with exported IR`** block to copy the AI mutation prompt (rules + IR) to clipboard in one step.
+3. Paste into an AI model.
+4. Have the model produce patch JSON or edited IR.
+5. Open `Blockify`.
+6. Paste source IR into `Source IR`.
+7. Paste patch JSON into `Patch JSON`.
+8. Apply patch and inspect the visual result.
+9. Copy the patched IR or use it as the new source.
+
+Step 2 replaces the previous manual step of copying IR and prepending mutation rules by hand.
 
 ## Implemented
 
@@ -39,6 +42,7 @@ Implemented:
 - copy top-level stack by index to clipboard
 - top-level stack count by sprite
 - explicit menu export support for `looks_backdrops` and `looks_costume`
+- publishes last export to `globalThis.__TEXTIFY_SHARED__` for cross-extension reads
 
 ### Blockify
 
@@ -57,6 +61,7 @@ Implemented:
   - `Patched IR Result`
   - visual preview
 - button row pinned at the bottom of the editor
+- **`copy rules with exported IR`** command block: reads Textify's last export from shared state, prepends the canonical AI mutation rules header, and copies the merged payload to clipboard; copies `no copied IR` if no valid IR has been exported yet
 
 Embedded build artifact:
 
@@ -137,8 +142,8 @@ These return structured results:
 
 Current Jest status at this checkpoint:
 
-- `9` test suites passing
-- `47` tests passing
+- `18` test suites passing
+- `116` tests passing
 
 Coverage currently includes:
 
@@ -149,6 +154,8 @@ Coverage currently includes:
 - patch engine operations
 - patch workflow state behavior
 - editor layout behavior
+- Textify/Blockify shared state bridge (`__TEXTIFY_SHARED__`)
+- `copyRulesWithExportedIR` block behavior (all cases)
 
 ## Next Likely Steps
 
