@@ -258,6 +258,16 @@ Use these columns when turning the sample cases into a spreadsheet or test ledge
 - `Unintended Changes`
 - `Notes`
 
+## Prompt Sensitivity Findings
+
+### Finding 1: "Reply with the mutated IR only, nothing more" breaks Google AI output (2026-03-24)
+
+Adding the rule `Reply with the mutated IR only, nothing more.` to the AI mutation prompt caused Google AI to fail IR output that was previously passing on every test.
+
+The existing rule `Do not include explanation outside the IR.` was already sufficient for Google AI to produce clean, parseable IR without preamble or commentary.
+
+**Conclusion:** Do not add that rule back. If a model other than Google AI requires stronger output constraints, handle it with a model-specific prompt variation rather than modifying the shared rules constant.
+
 ## Current Significance
 
 These benchmark cases matter because they go beyond scalar edits. They test:
