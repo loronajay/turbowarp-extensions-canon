@@ -22,25 +22,30 @@ function makeTextifyGlobals(writeText = jest.fn().mockResolvedValue(undefined)) 
   };
 }
 
-function makeBlockifyGlobals(writeText = jest.fn().mockResolvedValue(undefined)) {
+function makeBlockifyGlobals(writeText = jest.fn().mockResolvedValue(undefined), readText = jest.fn().mockResolvedValue('')) {
   return {
     document: {
       getElementById() { return null; },
       createElement() {
         return {
           style: {},
+          dataset: {},
           appendChild() {},
           append() {},
           remove() {},
           select() {},
           setAttribute() {},
+          insertBefore() {},
+          set textContent(v) { this._t = v; },
+          get textContent() { return this._t || ''; },
           set value(v) { this._v = v; },
           get value() { return this._v || ''; }
         };
       },
+      head: { appendChild() {} },
       body: { appendChild() {} }
     },
-    navigator: { clipboard: { writeText } }
+    navigator: { clipboard: { writeText, readText } }
   };
 }
 
@@ -549,5 +554,126 @@ describe('Blockify copyRulesWithIR', () => {
     expect(block.blockType).toBe('command');
     expect(block.text).toBe('copy rules with IR [IR]');
     expect(block.arguments.IR).toBeDefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// loadClipboardIR block method tests
+// ---------------------------------------------------------------------------
+
+describe('Blockify loadClipboardIR', () => {
+  const VALID_IR = '[procedure proccode:"TEST" argumentnames:[] argumentdefaults:[] warp:false body:[stack:]]';
+
+  test('sets irBuffer from clipboard on valid IR', async () => {
+    const readText = jest.fn().mockResolvedValue(VALID_IR);
+    const { extension } = loadExtension('blockify-turbowarp.js', {
+      globals: makeBlockifyGlobals(jest.fn(), readText)
+    });
+
+    await extension.loadClipboardIR();
+
+    expect(extension.irBuffer).toBe(VALID_IR);
+  });
+
+  test('sets lastError when clipboard is empty', async () => {
+    const readText = jest.fn().mockResolvedValue('');
+    const { extension } = loadExtension('blockify-turbowarp.js', {
+      globals: makeBlockifyGlobals(jest.fn(), readText)
+    });
+
+    await extension.loadClipboardIR();
+
+    expect(extension.lastError).toBe('Clipboard is empty');
+  });
+
+  test('does not overwrite irBuffer when clipboard is empty', async () => {
+    const readText = jest.fn().mockResolvedValue('');
+    const { extension } = loadExtension('blockify-turbowarp.js', {
+      globals: makeBlockifyGlobals(jest.fn(), readText)
+    });
+    extension.setIRBuffer({ IR: VALID_IR });
+
+    await extension.loadClipboardIR();
+
+    expect(extension.irBuffer).toBe(VALID_IR);
+  });
+
+  test('loadClipboardIR is exposed as a command block in getInfo()', () => {
+    const { extension } = loadExtension('blockify-turbowarp.js', {
+      globals: makeBlockifyGlobals()
+    });
+    const info = extension.getInfo();
+    const block = info.blocks.find(b => b.opcode === 'loadClipboardIR');
+    expect(block).toBeDefined();
+    expect(block.blockType).toBe('command');
+    expect(block.text).toBe('load clipboard IR');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// clipboardIRMatchesBuffer block method tests
+// ---------------------------------------------------------------------------
+
+describe('Blockify clipboardIRMatchesBuffer', () => {
+  const IR_A = '[procedure proccode:"TEST" argumentnames:[] argumentdefaults:[] warp:false body:[stack:]]';
+  const IR_B = '[script body:[stack:]]';
+
+  test('returns true when clipboard IR matches irBuffer', async () => {
+    const readText = jest.fn().mockResolvedValue(IR_A);
+    const { extension } = loadExtension('blockify-turbowarp.js', {
+      globals: makeBlockifyGlobals(jest.fn(), readText)
+    });
+    extension.setIRBuffer({ IR: IR_A });
+
+    const result = await extension.clipboardIRMatchesBuffer();
+
+    expect(result).toBe(true);
+  });
+
+  test('returns false when clipboard IR differs from irBuffer', async () => {
+    const readText = jest.fn().mockResolvedValue(IR_B);
+    const { extension } = loadExtension('blockify-turbowarp.js', {
+      globals: makeBlockifyGlobals(jest.fn(), readText)
+    });
+    extension.setIRBuffer({ IR: IR_A });
+
+    const result = await extension.clipboardIRMatchesBuffer();
+
+    expect(result).toBe(false);
+  });
+
+  test('returns false when clipboard is empty', async () => {
+    const readText = jest.fn().mockResolvedValue('');
+    const { extension } = loadExtension('blockify-turbowarp.js', {
+      globals: makeBlockifyGlobals(jest.fn(), readText)
+    });
+    extension.setIRBuffer({ IR: IR_A });
+
+    const result = await extension.clipboardIRMatchesBuffer();
+
+    expect(result).toBe(false);
+  });
+
+  test('does NOT overwrite irBuffer', async () => {
+    const readText = jest.fn().mockResolvedValue(IR_B);
+    const { extension } = loadExtension('blockify-turbowarp.js', {
+      globals: makeBlockifyGlobals(jest.fn(), readText)
+    });
+    extension.setIRBuffer({ IR: IR_A });
+
+    await extension.clipboardIRMatchesBuffer();
+
+    expect(extension.irBuffer).toBe(IR_A);
+  });
+
+  test('clipboardIRMatchesBuffer is exposed as a boolean block in getInfo()', () => {
+    const { extension } = loadExtension('blockify-turbowarp.js', {
+      globals: makeBlockifyGlobals()
+    });
+    const info = extension.getInfo();
+    const block = info.blocks.find(b => b.opcode === 'clipboardIRMatchesBuffer');
+    expect(block).toBeDefined();
+    expect(block.blockType).toBe('boolean');
+    expect(block.text).toBe('clipboard IR matches buffer');
   });
 });

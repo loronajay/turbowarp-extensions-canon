@@ -24553,6 +24553,27 @@ ${owner.lastVisualCssStatus}` : "\n\nVISUAL CSS:\n[none]";
       refreshVisualPreview(owner, visual, irText);
       return panel;
     }
+    function showIRPreviewOnly(owner, irText, titleSuffix) {
+      injectVisualStyles();
+      const title = "Blockify IR Preview" + (titleSuffix ? " \u2014 " + titleSuffix : "");
+      const { panel, body } = makeFloatingPanel("blockify-phase1-preview", title);
+      owner.validateIR({ IR: irText });
+      owner.renderIR({ IR: irText });
+      const visual = document.createElement("div");
+      visual.dataset.viewportFill = "true";
+      visual.style.cssText = [
+        "flex:1",
+        "min-height:0",
+        "overflow:auto",
+        "background:#f3f3f3",
+        "border:1px solid #666",
+        "border-radius:8px",
+        "padding:0"
+      ].join(";");
+      body.appendChild(visual);
+      refreshVisualPreview(owner, visual, irText);
+      return panel;
+    }
     async function openClipboardPreviewFromClipboard(owner) {
       const text = (await readClipboardText()).trim();
       if (!text) {
@@ -24918,6 +24939,16 @@ ${owner.lastVisualCssStatus}` : "\n\nVISUAL CSS:\n[none]";
               text: "last Blockify error"
             },
             {
+              opcode: "loadClipboardIR",
+              blockType: Scratch2.BlockType.COMMAND,
+              text: "load clipboard IR"
+            },
+            {
+              opcode: "clipboardIRMatchesBuffer",
+              blockType: Scratch2.BlockType.BOOLEAN,
+              text: "clipboard IR matches buffer"
+            },
+            {
               opcode: "copyRulesWithExportedIR",
               blockType: Scratch2.BlockType.COMMAND,
               text: "copy rules with exported IR"
@@ -25037,6 +25068,21 @@ ${owner.lastVisualCssStatus}` : "\n\nVISUAL CSS:\n[none]";
           return false;
         }
         return copyTextToClipboard(this.lastPatchedIR);
+      }
+      async loadClipboardIR() {
+        const text = (await readClipboardText()).trim();
+        if (!text) {
+          this.lastError = "Clipboard is empty";
+          return;
+        }
+        showClipboardPreview(this, text);
+      }
+      async clipboardIRMatchesBuffer() {
+        const text = (await readClipboardText()).trim();
+        if (!text) return false;
+        const matches = text === (this.irBuffer || "").trim();
+        showIRPreviewOnly(this, text, matches ? "matches buffer \u2713" : "MISMATCH \u2717");
+        return matches;
       }
       async copyRulesWithIRBuffer() {
         const ir = String(this.irBuffer || "").trim();
