@@ -24835,108 +24835,9 @@ ${owner.lastVisualCssStatus}` : "\n\nVISUAL CSS:\n[none]";
           color2: "#4c5cc5",
           blocks: [
             {
-              blockType: Scratch2.BlockType.BUTTON,
-              text: "Blockify Clipboard IR",
-              func: "openClipboardPreviewButton"
-            },
-            {
-              opcode: "validateIR",
-              blockType: Scratch2.BlockType.BOOLEAN,
-              text: "validate Blockify IR [IR]",
-              arguments: {
-                IR: {
-                  type: Scratch2.ArgumentType.STRING,
-                  defaultValue: ""
-                }
-              }
-            },
-            {
-              opcode: "renderIR",
-              blockType: Scratch2.BlockType.REPORTER,
-              text: "render Blockify IR [IR]",
-              arguments: {
-                IR: {
-                  type: Scratch2.ArgumentType.STRING,
-                  defaultValue: ""
-                }
-              }
-            },
-            {
-              opcode: "setIRBuffer",
-              blockType: Scratch2.BlockType.COMMAND,
-              text: "set Blockify IR buffer [IR]",
-              arguments: {
-                IR: {
-                  type: Scratch2.ArgumentType.STRING,
-                  defaultValue: ""
-                }
-              }
-            },
-            {
-              opcode: "setPatchBuffer",
-              blockType: Scratch2.BlockType.COMMAND,
-              text: "set Blockify patch buffer [PATCH]",
-              arguments: {
-                PATCH: {
-                  type: Scratch2.ArgumentType.STRING,
-                  defaultValue: ""
-                }
-              }
-            },
-            {
               opcode: "editIRBuffer",
               blockType: Scratch2.BlockType.COMMAND,
               text: "open Blockify IR editor"
-            },
-            {
-              opcode: "blockifyClipboardText",
-              blockType: Scratch2.BlockType.BOOLEAN,
-              text: "blockify clipboard text"
-            },
-            {
-              opcode: "validateIRBuffer",
-              blockType: Scratch2.BlockType.BOOLEAN,
-              text: "validate Blockify IR buffer"
-            },
-            {
-              opcode: "renderIRBuffer",
-              blockType: Scratch2.BlockType.REPORTER,
-              text: "render Blockify IR buffer"
-            },
-            {
-              opcode: "getIRBuffer",
-              blockType: Scratch2.BlockType.REPORTER,
-              text: "Blockify IR buffer"
-            },
-            {
-              opcode: "getPatchBuffer",
-              blockType: Scratch2.BlockType.REPORTER,
-              text: "Blockify patch buffer"
-            },
-            {
-              opcode: "applyPatchBufferToIRBuffer",
-              blockType: Scratch2.BlockType.BOOLEAN,
-              text: "apply Blockify patch buffer to IR buffer"
-            },
-            {
-              opcode: "getLastPatchedIR",
-              blockType: Scratch2.BlockType.REPORTER,
-              text: "last Blockify patched IR"
-            },
-            {
-              opcode: "getLastPatchError",
-              blockType: Scratch2.BlockType.REPORTER,
-              text: "last Blockify patch error"
-            },
-            {
-              opcode: "copyLastPatchedIRToClipboard",
-              blockType: Scratch2.BlockType.BOOLEAN,
-              text: "copy last Blockify patched IR to clipboard"
-            },
-            {
-              opcode: "getLastError",
-              blockType: Scratch2.BlockType.REPORTER,
-              text: "last Blockify error"
             },
             {
               opcode: "loadClipboardIR",
@@ -24954,20 +24855,19 @@ ${owner.lastVisualCssStatus}` : "\n\nVISUAL CSS:\n[none]";
               text: "copy rules with exported IR"
             },
             {
-              opcode: "copyRulesWithIR",
-              blockType: Scratch2.BlockType.COMMAND,
-              text: "copy rules with IR [IR]",
-              arguments: {
-                IR: {
-                  type: Scratch2.ArgumentType.STRING,
-                  defaultValue: ""
-                }
-              }
-            },
-            {
               opcode: "copyRulesWithIRBuffer",
               blockType: Scratch2.BlockType.COMMAND,
               text: "copy rules with IR buffer"
+            },
+            {
+              opcode: "getLastPatchError",
+              blockType: Scratch2.BlockType.REPORTER,
+              text: "last Blockify patch error"
+            },
+            {
+              opcode: "getLastError",
+              blockType: Scratch2.BlockType.REPORTER,
+              text: "last Blockify error"
             }
           ]
         };

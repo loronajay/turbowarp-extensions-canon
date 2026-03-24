@@ -544,16 +544,11 @@ describe('Blockify copyRulesWithIR', () => {
     expect(copied).toContain(ir);
   });
 
-  test('copyRulesWithIR is exposed as a block in getInfo() with IR argument', () => {
+  test('copyRulesWithIR method still exists on the extension', () => {
     const { extension } = loadExtension('blockify-turbowarp.js', {
       globals: makeBlockifyGlobals()
     });
-    const info = extension.getInfo();
-    const block = info.blocks.find(b => b.opcode === 'copyRulesWithIR');
-    expect(block).toBeDefined();
-    expect(block.blockType).toBe('command');
-    expect(block.text).toBe('copy rules with IR [IR]');
-    expect(block.arguments.IR).toBeDefined();
+    expect(typeof extension.copyRulesWithIR).toBe('function');
   });
 });
 

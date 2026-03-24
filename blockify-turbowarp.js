@@ -2847,108 +2847,9 @@ IR:
         color2: '#4c5cc5',
         blocks: [
           {
-            blockType: Scratch.BlockType.BUTTON,
-            text: 'Blockify Clipboard IR',
-            func: 'openClipboardPreviewButton'
-          },
-          {
-            opcode: 'validateIR',
-            blockType: Scratch.BlockType.BOOLEAN,
-            text: 'validate Blockify IR [IR]',
-            arguments: {
-              IR: {
-                type: Scratch.ArgumentType.STRING,
-                defaultValue: ''
-              }
-            }
-          },
-          {
-            opcode: 'renderIR',
-            blockType: Scratch.BlockType.REPORTER,
-            text: 'render Blockify IR [IR]',
-            arguments: {
-              IR: {
-                type: Scratch.ArgumentType.STRING,
-                defaultValue: ''
-              }
-            }
-          },
-          {
-            opcode: 'setIRBuffer',
-            blockType: Scratch.BlockType.COMMAND,
-            text: 'set Blockify IR buffer [IR]',
-            arguments: {
-              IR: {
-                type: Scratch.ArgumentType.STRING,
-                defaultValue: ''
-              }
-            }
-          },
-          {
-            opcode: 'setPatchBuffer',
-            blockType: Scratch.BlockType.COMMAND,
-            text: 'set Blockify patch buffer [PATCH]',
-            arguments: {
-              PATCH: {
-                type: Scratch.ArgumentType.STRING,
-                defaultValue: ''
-              }
-            }
-          },
-          {
             opcode: 'editIRBuffer',
             blockType: Scratch.BlockType.COMMAND,
             text: 'open Blockify IR editor'
-          },
-          {
-            opcode: 'blockifyClipboardText',
-            blockType: Scratch.BlockType.BOOLEAN,
-            text: 'blockify clipboard text'
-          },
-          {
-            opcode: 'validateIRBuffer',
-            blockType: Scratch.BlockType.BOOLEAN,
-            text: 'validate Blockify IR buffer'
-          },
-          {
-            opcode: 'renderIRBuffer',
-            blockType: Scratch.BlockType.REPORTER,
-            text: 'render Blockify IR buffer'
-          },
-          {
-            opcode: 'getIRBuffer',
-            blockType: Scratch.BlockType.REPORTER,
-            text: 'Blockify IR buffer'
-          },
-          {
-            opcode: 'getPatchBuffer',
-            blockType: Scratch.BlockType.REPORTER,
-            text: 'Blockify patch buffer'
-          },
-          {
-            opcode: 'applyPatchBufferToIRBuffer',
-            blockType: Scratch.BlockType.BOOLEAN,
-            text: 'apply Blockify patch buffer to IR buffer'
-          },
-          {
-            opcode: 'getLastPatchedIR',
-            blockType: Scratch.BlockType.REPORTER,
-            text: 'last Blockify patched IR'
-          },
-          {
-            opcode: 'getLastPatchError',
-            blockType: Scratch.BlockType.REPORTER,
-            text: 'last Blockify patch error'
-          },
-          {
-            opcode: 'copyLastPatchedIRToClipboard',
-            blockType: Scratch.BlockType.BOOLEAN,
-            text: 'copy last Blockify patched IR to clipboard'
-          },
-          {
-            opcode: 'getLastError',
-            blockType: Scratch.BlockType.REPORTER,
-            text: 'last Blockify error'
           },
           {
             opcode: 'loadClipboardIR',
@@ -2966,20 +2867,19 @@ IR:
             text: 'copy rules with exported IR'
           },
           {
-            opcode: 'copyRulesWithIR',
-            blockType: Scratch.BlockType.COMMAND,
-            text: 'copy rules with IR [IR]',
-            arguments: {
-              IR: {
-                type: Scratch.ArgumentType.STRING,
-                defaultValue: ''
-              }
-            }
-          },
-          {
             opcode: 'copyRulesWithIRBuffer',
             blockType: Scratch.BlockType.COMMAND,
             text: 'copy rules with IR buffer'
+          },
+          {
+            opcode: 'getLastPatchError',
+            blockType: Scratch.BlockType.REPORTER,
+            text: 'last Blockify patch error'
+          },
+          {
+            opcode: 'getLastError',
+            blockType: Scratch.BlockType.REPORTER,
+            text: 'last Blockify error'
           }
         ]
       };
