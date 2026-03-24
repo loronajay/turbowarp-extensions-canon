@@ -23780,7 +23780,10 @@ ${owner.lastVisualCssStatus}` : "\n\nVISUAL CSS:\n[none]";
         const rendererCssInjected = visual.dataset && visual.dataset.rendererCssInjected ? visual.dataset.rendererCssInjected : "";
         const rendererCssIds = visual.dataset && visual.dataset.rendererCssIds ? visual.dataset.rendererCssIds : "";
         owner.lastVisualCssStatus = commonCssInjected || rendererCssInjected ? `common=${commonCssInjected || "false"}, renderer=${rendererCssInjected || "false"}${rendererCssIds ? `, ids=${rendererCssIds}` : ""}` : "";
-      } catch {
+      } catch (err) {
+        const msg = owner.lastError || (err && err.message ? err.message : String(err));
+        visual.innerHTML = `<div style="color:#c00;font-family:monospace;font-size:.85rem;padding:1rem;white-space:pre-wrap">ERROR:
+${msg}</div>`;
       }
     }
     function updateEditorPreviewState(owner, visual, irText) {
@@ -24577,6 +24580,24 @@ ${owner.lastVisualCssStatus}` : "\n\nVISUAL CSS:\n[none]";
       refreshVisualPreview(owner, visual, irText);
       return panel;
     }
+    function showErrorPanel(message) {
+      injectVisualStyles();
+      const { panel, body } = makeFloatingPanel("blockify-phase1-preview", "Blockify Error");
+      const visual = document.createElement("div");
+      visual.style.cssText = [
+        "flex:1",
+        "min-height:0",
+        "overflow:auto",
+        "background:#f3f3f3",
+        "border:1px solid #666",
+        "border-radius:8px",
+        "padding:0"
+      ].join(";");
+      visual.innerHTML = `<div style="color:#c00;font-family:monospace;font-size:.85rem;padding:1rem;white-space:pre-wrap">ERROR:
+${message}</div>`;
+      body.appendChild(visual);
+      return panel;
+    }
     async function openClipboardPreviewFromClipboard(owner) {
       const text = (await readClipboardText()).trim();
       if (!text) {
@@ -24976,6 +24997,7 @@ ${owner.lastVisualCssStatus}` : "\n\nVISUAL CSS:\n[none]";
         const text = (await readClipboardText()).trim();
         if (!text) {
           this.lastError = "Clipboard is empty";
+          showErrorPanel("Clipboard is empty");
           return;
         }
         showClipboardPreview(this, text);
