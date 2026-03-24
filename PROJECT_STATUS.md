@@ -85,6 +85,7 @@ Canonical benchmark-style mutation samples are documented in:
 
 - [AI_MUTATION_BENCHMARKS.md](/Users/leoja/Desktop/Dad%20Games/turbowarp-extensions-js/canon/AI_MUTATION_BENCHMARKS.md)
 - [GOOGLE_AI_ROUNDTRIP_HISTORY.md](/Users/leoja/Desktop/Dad%20Games/turbowarp-extensions-js/canon/GOOGLE_AI_ROUNDTRIP_HISTORY.md)
+- [CHATGPT_ROUNDTRIP_HISTORY.md](/Users/leoja/Desktop/Dad%20Games/turbowarp-extensions-js/canon/CHATGPT_ROUNDTRIP_HISTORY.md)
 
 These record nontrivial LLM mutation tasks that go beyond simple scalar edits, including:
 
@@ -96,6 +97,8 @@ These record nontrivial LLM mutation tasks that go beyond simple scalar edits, i
 A structured test ledger with 8 tests across two base IRs is available in `AI_MODEL_TEST_LEDGER.md` and `ai-model-test-ledger.html`.
 
 Google Gemini (current) round 2 (2026-03-24): **8/8 pass** across parse, validate, and structural correctness using the embedded renderer. Session context bleed observed on tests 4 and 5 — resolved by re-anchoring to the starting IR before each mutation request.
+
+ChatGPT round 1 (2026-03-24): **8/8 pass** across parse, validate, and structural correctness using the embedded renderer. Initial bleed observed and eliminated mid-session by combining two fixes: updated `AI_MUTATION_RULES` (require IR echo before mutation) and a between-test continuation prompt (`start from here, don't change anything: (provided IR)`). All 8 tests ran in the same session. See `CHATGPT_ROUNDTRIP_HISTORY.md`.
 
 ## Architecture Boundary
 

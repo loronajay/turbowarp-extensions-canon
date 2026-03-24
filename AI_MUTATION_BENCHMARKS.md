@@ -276,6 +276,17 @@ Both cases were resolved by explicitly prompting the model to return to the corr
 
 **Implication for test methodology:** Each test should either be run in a fresh session, or the starting IR should be explicitly re-stated as a reminder before each mutation request. Do not assume the model is working from the correct base after multiple mutations in the same session.
 
+### Finding 3: Continuation prompt eliminates bleed when running tests in the same session (2026-03-24)
+
+ChatGPT also showed session context bleed initially when multiple tests were run in succession in the same chat. After two changes were made together, bleed was completely eliminated:
+
+1. The `AI_MUTATION_RULES` constant was updated to require the model to repeat the starting IR back exactly before applying any mutation.
+2. A **continuation prompt** was added between tests: `"start from here, don't change anything: (provided test IR)"` — explicitly re-anchoring the model to the correct base before the next mutation request.
+
+With both changes in place, all 8 ChatGPT tests passed in the same session with zero bleed.
+
+**Standard multi-test workflow:** When running multiple tests against any model in a single session, always send the continuation prompt with the correct starting IR before each new mutation request. Do not assume the model is working from the correct base between tests. The `copy rules with IR buffer` block supports this — paste the starting IR into the Blockify editor buffer, then use the block to copy the rules + IR for the continuation prompt.
+
 ## Current Significance
 
 These benchmark cases matter because they go beyond scalar edits. They test:
