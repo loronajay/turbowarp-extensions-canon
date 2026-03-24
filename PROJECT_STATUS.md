@@ -95,7 +95,7 @@ These record nontrivial LLM mutation tasks that go beyond simple scalar edits, i
 
 A structured test ledger with 8 tests across two base IRs is available in `AI_MODEL_TEST_LEDGER.md` and `ai-model-test-ledger.html`.
 
-Google AI round 2 (2026-03-24): **8/8 pass** across parse, validate, and structural correctness using the embedded renderer. Session context bleed observed on tests 4 and 5 — resolved by re-anchoring to the starting IR before each mutation request.
+Google Gemini (current) round 2 (2026-03-24): **8/8 pass** across parse, validate, and structural correctness using the embedded renderer. Session context bleed observed on tests 4 and 5 — resolved by re-anchoring to the starting IR before each mutation request.
 
 ## Architecture Boundary
 

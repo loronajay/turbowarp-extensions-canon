@@ -1,8 +1,8 @@
-# Google AI Round-Trip History
+# Google Gemini (current) Round-Trip History
 
 ## Purpose
 
-This file records the historical Google AI mutation tests that were run against the Textify/Blockify IR workflow.
+This file records the historical Google Gemini (current) mutation tests that were run against the Textify/Blockify IR workflow.
 
 Each case includes:
 
@@ -519,7 +519,7 @@ Interpretation:
 
 ### Setup
 
-- **Model:** Google AI
+- **Model:** Google Gemini (current)
 - **Date:** 2026-03-24
 - **Tooling:** `copy rules with IR buffer` block in Blockify embedded renderer
 - **Renderer:** full embedded scratch-blocks (real block images, not fallback)
@@ -542,11 +542,11 @@ All 8 tests passed. No unintended changes on any test.
 
 ### Session Context Bleed (Tests 4 and 5)
 
-On tests 4 and 5, Google AI carried state from prior mutations in the same conversation session. It introduced structure from a previous mutation (test 3 introduced a `looks_say` block; this bled into the test 4 output) rather than working from the clean starting IR.
+On tests 4 and 5, Google Gemini (current) carried state from prior mutations in the same conversation session. It introduced structure from a previous mutation (test 3 introduced a `looks_say` block; this bled into the test 4 output) rather than working from the clean starting IR.
 
 Both tests required explicitly prompting the model to return to the correct starting IR before producing the mutation. Once re-anchored, the correct output was produced on the next attempt.
 
-**Implication:** When running multiple tests against Google AI in a single session, structural context from earlier mutations can bleed into later outputs. Tests 4 and 5 are structurally downstream of 3 in terms of nesting complexity, which may have amplified the drift. Starting a fresh session per test would avoid this.
+**Implication:** When running multiple tests against Google Gemini (current) in a single session, structural context from earlier mutations can bleed into later outputs. Tests 4 and 5 are structurally downstream of 3 in terms of nesting complexity, which may have amplified the drift. Starting a fresh session per test would avoid this.
 
 ### Round 2 Significance
 
@@ -563,7 +563,7 @@ The session context bleed finding is the only meaningful limitation observed.
 
 ## Historical Takeaway
 
-These Google AI tests matter because they were not limited to simple renames or scalar edits.
+These Google Gemini (current) tests matter because they were not limited to simple renames or scalar edits.
 
 They included:
 

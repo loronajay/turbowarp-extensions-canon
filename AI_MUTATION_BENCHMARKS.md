@@ -260,17 +260,17 @@ Use these columns when turning the sample cases into a spreadsheet or test ledge
 
 ## Prompt Sensitivity Findings
 
-### Finding 1: "Reply with the mutated IR only, nothing more" breaks Google AI output (2026-03-24)
+### Finding 1: "Reply with the mutated IR only, nothing more" breaks Google Gemini (current) output (2026-03-24)
 
-Adding the rule `Reply with the mutated IR only, nothing more.` to the AI mutation prompt caused Google AI to fail IR output that was previously passing on every test.
+Adding the rule `Reply with the mutated IR only, nothing more.` to the AI mutation prompt caused Google Gemini (current) to fail IR output that was previously passing on every test.
 
-The existing rule `Do not include explanation outside the IR.` was already sufficient for Google AI to produce clean, parseable IR without preamble or commentary.
+The existing rule `Do not include explanation outside the IR.` was already sufficient for Google Gemini (current) to produce clean, parseable IR without preamble or commentary.
 
-**Conclusion:** Do not add that rule back. If a model other than Google AI requires stronger output constraints, handle it with a model-specific prompt variation rather than modifying the shared rules constant.
+**Conclusion:** Do not add that rule back. If a model other than Google Gemini (current) requires stronger output constraints, handle it with a model-specific prompt variation rather than modifying the shared rules constant.
 
-### Finding 2: Google AI session context bleed on structurally similar tests (2026-03-24)
+### Finding 2: Google Gemini (current) session context bleed on structurally similar tests (2026-03-24)
 
-When running multiple mutation tests against Google AI in a single conversation session, the model can carry structural context from earlier mutations into later outputs. Observed on tests 4 and 5 of the AI Model Test Ledger round 2 run — a `looks_say` block introduced in test 3 appeared in the test 4 output, which should have been a clean operator swap with no say block present.
+When running multiple mutation tests against Google Gemini (current) in a single conversation session, the model can carry structural context from earlier mutations into later outputs. Observed on tests 4 and 5 of the AI Model Test Ledger round 2 run — a `looks_say` block introduced in test 3 appeared in the test 4 output, which should have been a clean operator swap with no say block present.
 
 Both cases were resolved by explicitly prompting the model to return to the correct starting IR before proceeding with the mutation request.
 
