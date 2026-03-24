@@ -287,6 +287,21 @@ With both changes in place, all 8 ChatGPT tests passed in the same session with 
 
 **Standard multi-test workflow:** When running multiple tests against any model in a single session, always send the continuation prompt with the correct starting IR before each new mutation request. Do not assume the model is working from the correct base between tests. The `copy rules with IR buffer` block supports this — paste the starting IR into the Blockify editor buffer, then use the block to copy the rules + IR for the continuation prompt.
 
+### Finding 4: String literal quoting is a known model failure mode on IR-B tests (2026-03-24)
+
+Claude Sonnet 4.6 (via Poe) failed test 3 on IR-B by producing unquoted string literals:
+
+```
+[literal:string:looping]   ← invalid
+[literal:string:"looping"] ← required
+```
+
+This caused a parse failure in Blockify. The structural mutation was otherwise attempted correctly — the error was purely a grammar violation on string literal formatting.
+
+The IR grammar requires string literal values to be enclosed in double quotes. Number and boolean literals are not quoted. This distinction is a specific rule that models can miss, particularly when mutating IR that contains string literals for the first time in a session.
+
+**Implication:** When evaluating model output on IR-B tests, check that string literals are properly quoted before treating a result as passing. This failure mode may appear across models, not only Claude.
+
 ## Current Significance
 
 These benchmark cases matter because they go beyond scalar edits. They test:
