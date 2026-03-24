@@ -2939,6 +2939,11 @@ IR:
                 defaultValue: ''
               }
             }
+          },
+          {
+            opcode: 'copyRulesWithIRBuffer',
+            blockType: Scratch.BlockType.COMMAND,
+            text: 'copy rules with IR buffer'
           }
         ]
       };
@@ -3055,6 +3060,15 @@ IR:
         return false;
       }
       return copyTextToClipboard(this.lastPatchedIR);
+    }
+
+    async copyRulesWithIRBuffer() {
+      const ir = String(this.irBuffer || '').trim();
+      if (!ir.startsWith('[procedure') && !ir.startsWith('[script')) {
+        await copyTextToClipboard('no copied IR');
+        return;
+      }
+      await copyTextToClipboard(`${AI_MUTATION_RULES}${ir}`);
     }
 
     async copyRulesWithIR(args) {

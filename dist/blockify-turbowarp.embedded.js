@@ -24932,6 +24932,11 @@ ${owner.lastVisualCssStatus}` : "\n\nVISUAL CSS:\n[none]";
                   defaultValue: ""
                 }
               }
+            },
+            {
+              opcode: "copyRulesWithIRBuffer",
+              blockType: Scratch2.BlockType.COMMAND,
+              text: "copy rules with IR buffer"
             }
           ]
         };
@@ -25032,6 +25037,14 @@ ${owner.lastVisualCssStatus}` : "\n\nVISUAL CSS:\n[none]";
           return false;
         }
         return copyTextToClipboard(this.lastPatchedIR);
+      }
+      async copyRulesWithIRBuffer() {
+        const ir = String(this.irBuffer || "").trim();
+        if (!ir.startsWith("[procedure") && !ir.startsWith("[script")) {
+          await copyTextToClipboard("no copied IR");
+          return;
+        }
+        await copyTextToClipboard(`${AI_MUTATION_RULES}${ir}`);
       }
       async copyRulesWithIR(args) {
         const ir = String(args.IR ?? "").trim();
