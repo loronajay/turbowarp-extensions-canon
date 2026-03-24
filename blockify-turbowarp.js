@@ -20,6 +20,31 @@
     throw new Error('Blockify Phase 1 must be loaded unsandboxed.');
   }
 
+  const AI_MUTATION_RULES = `You are modifying Textify canon IR.
+
+Requirements:
+- Mutate only the IR provided below.
+- Preserve all unrelated structure.
+- Preserve opcode ids unless new nodes are required.
+- Keep fields, inputs, and stacks distinct.
+- Do not invent unsupported structure.
+- Return only valid Textify canon IR.
+- Do not include explanation outside the IR.
+
+IR:
+`;
+
+  function getLastExportedIR() {
+    const shared = globalThis.__TEXTIFY_SHARED__ || null;
+    if (!shared) return '';
+    return typeof shared.lastExportText === 'string' ? shared.lastExportText : '';
+  }
+
+  function hasValidExportedIR() {
+    const text = getLastExportedIR().trim();
+    return text.startsWith('[procedure') || text.startsWith('[script');
+  }
+
   class ParseError extends Error {
     constructor(message) {
       super(message);
@@ -2898,6 +2923,11 @@
             opcode: 'getLastError',
             blockType: Scratch.BlockType.REPORTER,
             text: 'last Blockify error'
+          },
+          {
+            opcode: 'copyRulesWithExportedIR',
+            blockType: Scratch.BlockType.COMMAND,
+            text: 'copy rules with exported IR'
           }
         ]
       };
@@ -3016,6 +3046,15 @@
       return copyTextToClipboard(this.lastPatchedIR);
     }
 
+    async copyRulesWithExportedIR() {
+      if (!hasValidExportedIR()) {
+        await copyTextToClipboard('no copied IR');
+        return;
+      }
+      const merged = `${AI_MUTATION_RULES}${getLastExportedIR()}`;
+      await copyTextToClipboard(merged);
+    }
+
     getLastError() {
       return this.lastError || '';
     }
@@ -3041,7 +3080,9 @@
       updateEditorPreviewState,
       getPreferredPreviewIR,
       buildEditorStatusText,
-      refreshVisualPreview
+      refreshVisualPreview,
+      getLastExportedIR,
+      hasValidExportedIR
     };
   }
 

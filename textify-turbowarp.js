@@ -8,6 +8,8 @@
   const vm = Scratch.vm;
 
   let lastExportText = '';
+  globalThis.__TEXTIFY_SHARED__ = { lastExportText: '' };
+
   const EXPLICIT_MENU_OPCODES = new Set([
     'looks_backdrops',
     'looks_costume'
@@ -621,6 +623,7 @@
   async function exportAndPresent(target, procName, options = {}) {
     const result = exportProcedureText(target, procName);
     lastExportText = result;
+    globalThis.__TEXTIFY_SHARED__.lastExportText = lastExportText;
 
     if (options.copy) {
       await copyTextToClipboard(result);
@@ -636,6 +639,7 @@
   async function exportStackAndPresent(target, index, options = {}) {
     const result = exportTopLevelStackText(target, index);
     lastExportText = result;
+    globalThis.__TEXTIFY_SHARED__.lastExportText = lastExportText;
 
     if (options.copy) {
       await copyTextToClipboard(result);
