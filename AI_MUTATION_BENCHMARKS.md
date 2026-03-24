@@ -310,6 +310,16 @@ This is the first evidence that models can bridge from behavioral intent to corr
 
 **Implication:** Behavioral prompts are a viable mutation request style. They more closely reflect how a non-technical user would describe a change, and they test a different capability than direct structural prompts.
 
+### Finding 7: Opcode misspelling causes silent renderer fallback (2026-03-24)
+
+Google Gemini 3 produced `look_say` instead of `looks_say` on v2 test 3. The IR parsed and validated because the parser accepts any opcode string — the error was invisible until the embedded renderer silently fell back to plain-text output.
+
+This failure mode is distinct from a parse failure: the IR looks structurally correct, verdicts pass, but the visual output is wrong. The only signal is the fallback renderer appearing instead of real block images.
+
+The `AI_MUTATION_RULES` constant now includes an explicit opcode accuracy rule: copy opcode names exactly as they appear in the IR, with `looks_say` / `look_say` called out as the known example.
+
+**Implication:** When evaluating model output, a fallback renderer result should be treated as a warning that an opcode may be misspelled — inspect the output IR before recording a pass.
+
 ### Finding 6: Operator-swap behavioral prompts may cause unintended threshold adjustment (2026-03-24)
 
 When Google Gemini 3 was asked to make a position check "pass when the sprite has gone past the target" (v2 test 4), it changed the operator from `operator_equals` to `operator_gt` as intended, but also changed `OPERAND2` from `[literal:number:50]` to `[literal:number:49]`. The model interpreted "gone past 50" as "> 49", which is mathematically equivalent for integers but violates the structural invariant that literal values should remain unchanged unless explicitly requested.

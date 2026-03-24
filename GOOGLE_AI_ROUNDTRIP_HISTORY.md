@@ -581,9 +581,13 @@ The session context bleed finding is the only meaningful limitation observed.
 | 4 | Make position check less strict | — | — | — | Unintended change: literal value changed 50→49 — see below |
 | 5–8 | — | — | — | — | Not reached |
 
-### Test 3 — Fallback Renderer
+### Test 3 — Fallback Renderer (Misspelled Opcode)
 
-The IR parsed and validated successfully, but the Blockify embedded scratch-blocks renderer fell back to the plain-text fallback renderer. The structural mutation was achieved, but visual output was not rendered as real block images. Root cause is under investigation — likely an unsupported opcode or input shape in the model's output that the embedded renderer does not yet handle.
+The IR parsed and validated successfully, but the Blockify embedded scratch-blocks renderer fell back to the plain-text fallback renderer. Root cause identified: the model produced `look_say` instead of `looks_say` — a one-character typo in the opcode name. Because the IR parser accepts any opcode string, the IR passed parse and validation. The embedded renderer could not find a matching block for `look_say` and silently fell back.
+
+The structural mutation was otherwise correct — the block was placed in the right position with the right input. The failure was purely an opcode spelling error.
+
+This is the first recorded case of an opcode misspelling causing a silent renderer fallback.
 
 ### Test 4 — Threshold Adjustment
 
