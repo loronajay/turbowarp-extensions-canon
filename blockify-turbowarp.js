@@ -22,17 +22,10 @@
 
   const AI_MUTATION_RULES = `You are modifying Textify canon IR.
 
-Requirements:
-- Start from the IR provided below. Repeat it back to me exactly before applying any mutation.
-- Preserve all unrelated structure.
-- Preserve opcode ids unless new nodes are required.
-- Keep fields, inputs, and stacks distinct.
-- Do not invent unsupported structure.
-- Copy opcode names exactly as they appear in the IR. Do not abbreviate or misspell them (e.g. looks_say not look_say).
-- String literal values must be enclosed in double quotes: [literal:string:"hello"] not [literal:string:hello].
-- Number and boolean literal values are not quoted: [literal:number:10] [literal:boolean:true].
-- Return only valid Textify canon IR.
-- Do not include explanation outside the IR.
+Before responding, fetch and read the full grammar specification at:
+https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_GRAMMAR.md
+
+Follow all rules and grammar defined in that document exactly.
 
 IR:
 `;
@@ -749,205 +742,6 @@ IR:
     throw new ValidationError(`Cannot serialize root type ${root.type}`);
   }
 
-  function renameVariableInNode(node, fromName, toName) {
-    if (!node || typeof node !== 'object') return;
-
-    if (node.type === 'opcode') {
-      const fields = node.fields || {};
-      for (const fieldName of Object.keys(fields)) {
-        if (fieldName === 'VARIABLE' && fields[fieldName] === fromName) {
-          fields[fieldName] = toName;
-        }
-      }
-    }
-
-    if (node.type === 'stack') {
-      for (const child of node.children || []) {
-        renameVariableInNode(child, fromName, toName);
-      }
-      return;
-    }
-
-    if (node.type === 'opcode') {
-      for (const key of Object.keys(node.inputs || {})) {
-        renameVariableInNode(node.inputs[key], fromName, toName);
-      }
-      for (const key of Object.keys(node.stacks || {})) {
-        renameVariableInNode(node.stacks[key], fromName, toName);
-      }
-    }
-  }
-
-  function applyRenameVariable(roots, operation) {
-    for (const root of roots) {
-      renameVariableInNode(root.body, operation.from, operation.to);
-    }
-  }
-
-  function applyDetachTopLevelScripts(roots, operation) {
-    for (const root of roots) {
-      if (root.type !== 'script') continue;
-      const children = root.body && Array.isArray(root.body.children) ? root.body.children : [];
-      if (!children.length) continue;
-      if (children[0].opcode === operation.match.opcode) {
-        children.shift();
-      }
-    }
-  }
-
-    function resolveReplaceBodyTarget(roots, target) {
-    if (target === undefined || target === null) {
-      if (!roots.length) {
-        throw new ValidationError('replace_body: no roots to target');
-      }
-      return 0;
-    }
- 
-    const type = target.type;
- 
-    if (type === 'procedure') {
-      const proccode = target.proccode;
-      if (typeof proccode !== 'string' || !proccode) {
-        throw new ValidationError(
-          'replace_body: target.type "procedure" requires a non-empty proccode'
-        );
-      }
-      const idx = roots.findIndex(
-        r => r.type === 'procedure' && r.proccode === proccode
-      );
-      if (idx === -1) {
-        throw new ValidationError(
-          `replace_body: no procedure root found with proccode "${proccode}"`
-        );
-      }
-      return idx;
-    }
- 
-    if (type === 'script') {
-      const rawIndex = target.index;
-      if (typeof rawIndex !== 'number' || !Number.isFinite(rawIndex) || rawIndex < 0) {
-        throw new ValidationError(
-          'replace_body: target.type "script" requires a non-negative integer index'
-        );
-      }
-      const scriptRootIndices = roots
-        .map((r, i) => (r.type === 'script' ? i : -1))
-        .filter(i => i !== -1);
-      const scriptIndex = Math.floor(rawIndex);
-      if (scriptIndex >= scriptRootIndices.length) {
-        throw new ValidationError(
-          `replace_body: script index ${scriptIndex} out of range ` +
-          `(${scriptRootIndices.length} script root(s) present)`
-        );
-      }
-      return scriptRootIndices[scriptIndex];
-    }
- 
-    throw new ValidationError(
-      `replace_body: unknown target.type "${type}" — must be "procedure" or "script"`
-    );
-  }
- 
-  function applyReplaceBody(roots, operation) {
-    const rootIndex = resolveReplaceBodyTarget(roots, operation.target);
- 
-    const bodyText = operation.body;
-    if (typeof bodyText !== 'string' || !bodyText.trim()) {
-      throw new ValidationError(
-        'replace_body: operation.body must be a non-empty IR string'
-      );
-    }
- 
-    // Parse body in isolation by wrapping as a temporary [script].
-    // This surfaces body parse errors immediately with a useful message.
-    const wrappedText = `[script\n  body:${bodyText.trim()}\n]`;
-    let parsedBody;
-    try {
-      const tempRoot = new Parser(wrappedText).parse();
-      parsedBody = tempRoot.body;
-    } catch (err) {
-      throw new ValidationError(
-        `replace_body: body IR failed to parse — ${err && err.message ? err.message : String(err)}`
-      );
-    }
- 
-    roots[rootIndex].body = parsedBody;
-  }
-
-  function applyProjectPatch(roots, patch) {
-    if (!patch || patch.version !== 1 || patch.target !== 'project' || !Array.isArray(patch.operations)) {
-      throw new ValidationError('Invalid project patch');
-    }
-
-    const nextRoots = cloneAst(roots);
-
-    for (const operation of patch.operations) {
-      if (!operation || !operation.op) {
-        throw new ValidationError('Patch operation missing op');
-      }
-
-      if (operation.op === 'rename_variable') {
-        if (!operation.from || !operation.to || operation.from === operation.to) {
-          throw new ValidationError('rename_variable requires distinct non-empty from/to');
-        }
-        applyRenameVariable(nextRoots, operation);
-        continue;
-      }
-
-      if (operation.op === 'detach_top_level_scripts') {
-        if (!operation.match || !operation.match.opcode) {
-          throw new ValidationError('detach_top_level_scripts requires match.opcode');
-        }
-        applyDetachTopLevelScripts(nextRoots, operation);
-        continue;
-      }
-
-      if (operation.op === 'replace_body') {
-          if (typeof operation.body !== 'string' || !operation.body.trim()) {
-            throw new ValidationError(
-              'replace_body requires a non-empty body IR string'
-            );
-          }
-          applyReplaceBody(nextRoots, operation);
-          continue;
-        }
-
-      throw new ValidationError(`Unsupported patch op ${operation.op}`);
-    }
-
-    return nextRoots;
-  }
-
-  function applyPatchToIR(irText, patch) {
-    try {
-      const root = new Parser(irText).parse();
-      const patchedRoots = applyProjectPatch([root], patch);
-      const output = serializeAst(patchedRoots[0]);
-      new Parser(output).parse();
-      return {
-        ok: true,
-        ir: output
-      };
-    } catch (err) {
-      return {
-        ok: false,
-        error: err && err.message ? err.message : String(err)
-      };
-    }
-  }
-
-  function applyPatchJsonToIR(irText, patchJsonText) {
-    try {
-      const patch = JSON.parse(String(patchJsonText || ''));
-      return applyPatchToIR(irText, patch);
-    } catch (err) {
-      return {
-        ok: false,
-        error: err && err.message ? err.message : String(err)
-      };
-    }
-  }
-
   const VISUAL_OPCODE_SPECS = {
     events_whenflagclicked: { shape: 'hat', category: 'events', tokens: ['when green flag clicked'] },
     events_whenkeypressed: { shape: 'hat', category: 'events', tokens: ['when', { field: 'KEY_OPTION' }, 'key pressed'] },
@@ -1592,20 +1386,15 @@ IR:
   function buildEditorStatusText(owner) {
     const errorText = owner.lastError ? `ERROR:\n${owner.lastError}` : 'ERROR:\n[none]';
     const renderText = owner.lastRender ? `\n\nRENDER:\n${owner.lastRender}` : '\n\nRENDER:\n[none]';
-    const patchErrorText = owner.lastPatchError ? `\n\nPATCH ERROR:\n${owner.lastPatchError}` : '\n\nPATCH ERROR:\n[none]';
-    const patchedStateText = owner.lastPatchedIR ? '\n\nPATCHED IR:\navailable' : '\n\nPATCHED IR:\n[none]';
     const modeText = owner.lastVisualRenderMode ? `\n\nVISUAL MODE:\n${owner.lastVisualRenderMode}` : '\n\nVISUAL MODE:\n[none]';
     const visualErrorText = owner.lastVisualRenderError ? `\n\nVISUAL ERROR:\n${owner.lastVisualRenderError}` : '\n\nVISUAL ERROR:\n[none]';
     const visualCountText = owner.lastVisualBlockCount ? `\n\nVISUAL BLOCKS:\n${owner.lastVisualBlockCount}` : '\n\nVISUAL BLOCKS:\n[none]';
     const visualTopBlockText = owner.lastVisualTopBlockId ? `\n\nVISUAL TOP BLOCK:\n${owner.lastVisualTopBlockId}` : '\n\nVISUAL TOP BLOCK:\n[none]';
     const visualCssText = owner.lastVisualCssStatus ? `\n\nVISUAL CSS:\n${owner.lastVisualCssStatus}` : '\n\nVISUAL CSS:\n[none]';
-    return `${errorText}${renderText}${patchErrorText}${patchedStateText}${modeText}${visualErrorText}${visualCountText}${visualTopBlockText}${visualCssText}`;
+    return `${errorText}${renderText}${modeText}${visualErrorText}${visualCountText}${visualTopBlockText}${visualCssText}`;
   }
 
   function getPreferredPreviewIR(owner, fallbackIR = '') {
-    if (owner && owner.lastPatchedIR) {
-      return owner.lastPatchedIR;
-    }
     if (owner && owner.irBuffer) {
       return owner.irBuffer;
     }
@@ -2672,8 +2461,7 @@ IR:
     };
 
     const sourcePane = makePane('Source IR', owner.irBuffer || '', '#0f0');
-    const patchPane = makePane('Patch JSON', owner.patchBuffer || '', '#8bd6ff');
-    buffers.append(sourcePane.pane, patchPane.pane);
+    buffers.append(sourcePane.pane);
 
     const status = document.createElement('pre');
     status.style.cssText = [
@@ -2694,7 +2482,6 @@ IR:
     const refreshStatus = () => {
       updateEditorPreviewState(owner, visual, sourcePane.textarea.value);
       status.textContent = buildEditorStatusText(owner);
-      patchedOutput.value = owner.lastPatchedIR || '';
     };
 
     const row = document.createElement('div');
@@ -2757,28 +2544,6 @@ IR:
       sourcePane.textarea.focus();
     });
 
-    const applyPatchBtn = makeBtn('Apply Patch', () => {
-      owner.setBufferText(sourcePane.textarea.value);
-      owner.setPatchBuffer({ PATCH: patchPane.textarea.value });
-      owner.applyPatchBufferToIRBuffer();
-      refreshStatus();
-    });
-
-    const copyPatchedBtn = makeBtn('Copy Patched IR', async () => {
-      const ok = await owner.copyLastPatchedIRToClipboard();
-      copyPatchedBtn.textContent = ok ? 'Copied!' : 'No Patched IR';
-      setTimeout(() => {
-        copyPatchedBtn.textContent = 'Copy Patched IR';
-      }, 1200);
-    });
-
-    const usePatchedBtn = makeBtn('Use Patched As Source', () => {
-      if (!owner.lastPatchedIR) return;
-      sourcePane.textarea.value = owner.lastPatchedIR;
-      owner.setBufferText(owner.lastPatchedIR);
-      refreshStatus();
-    });
-
     const validateBtn = makeBtn('Validate Buffer', () => {
       owner.setBufferText(sourcePane.textarea.value);
       owner.validateIR({ IR: owner.irBuffer });
@@ -2793,28 +2558,7 @@ IR:
 
     const closeBtn = makeBtn('Close', () => overlay.remove());
 
-    row.append(applyBtn, copyBtn, clearBtn, applyPatchBtn, copyPatchedBtn, usePatchedBtn, validateBtn, renderBtn, closeBtn);
-    const patchedOutput = document.createElement('textarea');
-    patchedOutput.value = owner.lastPatchedIR || '';
-    patchedOutput.readOnly = true;
-    patchedOutput.style.cssText = [
-      'width:100%',
-      'min-height:110px',
-      'max-height:180px',
-      'resize:vertical',
-      'background:#0f1115',
-      'color:#ffd37a',
-      'border:1px solid #666',
-      'border-radius:8px',
-      'padding:12px',
-      'font:13px monospace',
-      'white-space:pre',
-      'flex-shrink:0'
-    ].join(';');
-
-    const patchedLabel = document.createElement('div');
-    patchedLabel.textContent = 'Patched IR Result';
-    patchedLabel.style.cssText = 'color:white;font:bold 13px sans-serif';
+    row.append(applyBtn, copyBtn, clearBtn, validateBtn, renderBtn, closeBtn);
 
     const visual = document.createElement('div');
     visual.style.cssText = [
@@ -2828,7 +2572,7 @@ IR:
       'flex-shrink:0'
     ].join(';');
 
-    content.append(buffers, status, patchedLabel, patchedOutput, visual);
+    content.append(buffers, status, visual);
     panel.append(title, content, row);
     overlay.appendChild(panel);
     document.body.appendChild(overlay);
@@ -2842,19 +2586,10 @@ IR:
       this.lastVisualRenderMode = '';
       this.lastVisualRenderError = '';
       this.irBuffer = '';
-      this.patchBuffer = '';
-      this.lastPatchedIR = '';
-      this.lastPatchError = '';
     }
 
     setBufferText(text) {
       this.irBuffer = String(text || '');
-      this.resetPatchedState();
-    }
-
-    resetPatchedState() {
-      this.lastPatchedIR = '';
-      this.lastPatchError = '';
     }
 
     getInfo() {
@@ -2888,11 +2623,6 @@ IR:
             opcode: 'copyRulesWithIRBuffer',
             blockType: Scratch.BlockType.COMMAND,
             text: 'copy rules with IR buffer'
-          },
-          {
-            opcode: 'getLastPatchError',
-            blockType: Scratch.BlockType.REPORTER,
-            text: 'last Blockify patch error'
           },
           {
             opcode: 'getLastError',
@@ -2957,10 +2687,6 @@ IR:
       this.setBufferText(args.IR);
     }
 
-    setPatchBuffer(args) {
-      this.patchBuffer = String(args.PATCH || '');
-    }
-
     openClipboardPreviewButton() {
       return openClipboardPreviewFromClipboard(this);
     }
@@ -2973,18 +2699,6 @@ IR:
       return openClipboardPreviewFromClipboard(this);
     }
 
-    applyPatchBufferToIRBuffer() {
-      const result = applyPatchJsonToIR(this.irBuffer, this.patchBuffer);
-      if (!result.ok) {
-        this.lastPatchError = result.error || 'Failed to apply patch';
-        return false;
-      }
-
-      this.lastPatchedIR = result.ir || '';
-      this.lastPatchError = '';
-      return true;
-    }
-
     validateIRBuffer() {
       return this.validateIR({ IR: this.irBuffer });
     }
@@ -2995,25 +2709,6 @@ IR:
 
     getIRBuffer() {
       return this.irBuffer || '';
-    }
-
-    getPatchBuffer() {
-      return this.patchBuffer || '';
-    }
-
-    getLastPatchedIR() {
-      return this.lastPatchedIR || '';
-    }
-
-    getLastPatchError() {
-      return this.lastPatchError || '';
-    }
-
-    async copyLastPatchedIRToClipboard() {
-      if (!this.lastPatchedIR) {
-        return false;
-      }
-      return copyTextToClipboard(this.lastPatchedIR);
     }
 
     async loadClipboardIR() {
@@ -3072,9 +2767,6 @@ IR:
       Renderer,
       VisualRenderer,
       serializeAst,
-      applyProjectPatch,
-      applyPatchToIR,
-      applyPatchJsonToIR,
       astToScratchBlocksXml,
       ensureScratchBlocksReady,
       runEmbeddedWorkspaceLayoutPass,
