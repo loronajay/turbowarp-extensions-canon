@@ -27,6 +27,8 @@ https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_G
 
 Follow all rules and grammar defined in that document exactly.
 
+When you receive the IR below, do not make any modifications yet. First, repeat the IR back exactly as provided, then wait for a modification request.
+
 IR:
 `;
 
@@ -2615,14 +2617,14 @@ IR:
             text: 'clipboard IR matches buffer'
           },
           {
-            opcode: 'copyRulesWithExportedIR',
+            opcode: 'copyRulesWithClipboardIR',
             blockType: Scratch.BlockType.COMMAND,
-            text: 'copy rules with exported IR'
+            text: 'copy rules with clipboard IR'
           },
           {
-            opcode: 'copyRulesWithIRBuffer',
-            blockType: Scratch.BlockType.COMMAND,
-            text: 'copy rules with IR buffer'
+            opcode: 'readClipboard',
+            blockType: Scratch.BlockType.REPORTER,
+            text: 'clipboard contents'
           },
           {
             opcode: 'getLastError',
@@ -2729,8 +2731,8 @@ IR:
       return matches;
     }
 
-    async copyRulesWithIRBuffer() {
-      const ir = String(this.irBuffer || '').trim();
+    async copyRulesWithClipboardIR() {
+      const ir = (await readClipboardText()).trim();
       if (!ir.startsWith('[procedure') && !ir.startsWith('[script')) {
         await copyTextToClipboard('no copied IR');
         return;
@@ -2738,22 +2740,8 @@ IR:
       await copyTextToClipboard(`${AI_MUTATION_RULES}${ir}`);
     }
 
-    async copyRulesWithIR(args) {
-      const ir = String(args.IR ?? '').trim();
-      if (!ir.startsWith('[procedure') && !ir.startsWith('[script')) {
-        await copyTextToClipboard('no copied IR');
-        return;
-      }
-      await copyTextToClipboard(`${AI_MUTATION_RULES}${ir}`);
-    }
-
-    async copyRulesWithExportedIR() {
-      if (!hasValidExportedIR()) {
-        await copyTextToClipboard('no copied IR');
-        return;
-      }
-      const merged = `${AI_MUTATION_RULES}${getLastExportedIR()}`;
-      await copyTextToClipboard(merged);
+    async readClipboard() {
+      return readClipboardText();
     }
 
     getLastError() {
