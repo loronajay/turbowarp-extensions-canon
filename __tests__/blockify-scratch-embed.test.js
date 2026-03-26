@@ -277,6 +277,36 @@ describe('Blockify embedded Scratch renderer bridge', () => {
     expect(xml).toContain('<field name="CLONE_OPTION">_myself_</field>');
   });
 
+  test('sensing_of renders OBJECT input with correct field name', () => {
+    const { hooks } = getHooks();
+    const ast = {
+      type: 'script',
+      body: {
+        type: 'stack',
+        children: [
+          {
+            type: 'opcode',
+            opcode: 'sensing_of',
+            id: 'of1',
+            fields: { PROPERTY: 'backdrop #' },
+            inputs: {
+              OBJECT: { type: 'menu', menuOpcode: 'sensing_of_object_menu', value: '_stage_' }
+            },
+            stacks: {}
+          }
+        ]
+      }
+    };
+
+    const xml = hooks.astToScratchBlocksXml(ast);
+
+    expect(xml).toContain('<block type="sensing_of"');
+    expect(xml).toContain('<field name="PROPERTY">backdrop #</field>');
+    expect(xml).toContain('<shadow type="sensing_of_object_menu">');
+    expect(xml).toContain('<field name="OBJECT">_stage_</field>');
+    expect(xml).not.toContain('<field name="VALUE">');
+  });
+
   test('installs dynamic Scratch menu shims with reporter outputs during setup', () => {
     const { hooks } = getHooks();
     const scratchBlocks = {
@@ -289,6 +319,7 @@ describe('Blockify embedded Scratch renderer bridge', () => {
         sound_sounds_menu: {},
         sensing_touchingobjectmenu: {},
         sensing_distancetomenu: {},
+        sensing_of_object_menu: {},
         control_create_clone_of_menu: {}
       }
     };

@@ -267,10 +267,19 @@ Values are always double-quoted strings.
 | `sensing_answer` | *(reporter)* | |
 | `sensing_timer` | *(reporter)* | |
 | `sensing_resettimer` | *(none)* | |
+| `sensing_of` | `OBJECT` (`sensing_of_object_menu`) | `PROPERTY` |
+| `sensing_distanceto` | `DISTANCETOMENU` (menu) | |
+| `sensing_current` | | `CURRENTMENU` |
+| `sensing_dayssince2000` | *(reporter)* | |
+| `sensing_username` | *(reporter)* | |
+
+**`sensing_of` note:** `OBJECT` takes `[menu:sensing_of_object_menu:"VALUE"]` where `VALUE` is a sprite name or `_stage_`. `PROPERTY` is a field (plain string) — e.g. `"backdrop #"`, `"x position"`, `"costume #"`, `"volume"`, etc.
 
 ### Operators
 
-**Critical:** arithmetic operators use `NUM1`/`NUM2`, not `OPERAND1`/`OPERAND2`.
+**Critical — input naming is not interchangeable across operator groups:**
+- Arithmetic (`add`, `subtract`, `multiply`, `divide`, `mod`): use `NUM1`/`NUM2`. Writing `OPERAND1`/`OPERAND2` is tolerated by the parser but normalized to `NUM1`/`NUM2`.
+- Comparison and logic (`gt`, `lt`, `equals`, `and`, `or`): use `OPERAND1`/`OPERAND2`. Writing `NUM1`/`NUM2` here is **silently dropped** — the input will be empty and the block will not render correctly. There is no normalization in this direction.
 
 | Opcode | inputs |
 |---|---|

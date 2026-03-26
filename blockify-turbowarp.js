@@ -916,6 +916,7 @@
     event_broadcast_menu: 'BROADCAST_OPTION',
     sensing_touchingobjectmenu: 'TOUCHINGOBJECTMENU',
     sensing_distancetomenu: 'DISTANCETOMENU',
+    sensing_of_object_menu: 'OBJECT',
     sensing_keyoptions: 'KEY_OPTION',
     control_create_clone_of_menu: 'CLONE_OPTION'
   };
@@ -942,6 +943,7 @@
     sound_sounds_menu: { fieldName: 'SOUND_MENU', categoryExtension: 'colours_sounds' },
     sensing_touchingobjectmenu: { fieldName: 'TOUCHINGOBJECTMENU', categoryExtension: 'colours_sensing' },
     sensing_distancetomenu: { fieldName: 'DISTANCETOMENU', categoryExtension: 'colours_sensing' },
+    sensing_of_object_menu: { fieldName: 'OBJECT', categoryExtension: 'colours_sensing' },
     control_create_clone_of_menu: { fieldName: 'CLONE_OPTION', categoryExtension: 'colours_control' }
   };
 
