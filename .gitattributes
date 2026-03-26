@@ -1,0 +1,18 @@
+# Identify primary languages
+*.js linguist-language=JavaScript
+textify-turbowarp.js linguist-language=JavaScript
+blockify-turbowarp.js linguist-language=JavaScript
+
+# Treat documentation as documentation, not code
+*.md linguist-documentation
+README.md linguist-documentation
+MODEL_PRIMER.md linguist-documentation
+IR_GRAMMAR.md linguist-documentation
+IR_FULL_REFERENCE.md linguist-documentation
+PROJECT_STATUS.md linguist-documentation
+
+# Exclude build artifacts and dependencies from language stats
+dist/ linguist-vendored
+node_modules/ linguist-vendored
+*.lock linguist-vendored
+package-lock.json linguist-vendored
