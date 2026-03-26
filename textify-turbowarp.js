@@ -755,7 +755,7 @@ IR:
 
       lastExportText = ir;
       globalThis.__TEXTIFY_SHARED__.lastExportText = ir;
-      await copyTextToClipboard(`${IR_SPEC_HEADER}\n${ir}`);
+      await copyTextToClipboard(ir);
     }
 
     async copyAllStacksToClipboard(args, util) {
@@ -768,7 +768,7 @@ IR:
       const ir = exportAllStacksText(target, excludeId);
       lastExportText = ir;
       globalThis.__TEXTIFY_SHARED__.lastExportText = ir;
-      await copyTextToClipboard(`${IR_SPEC_HEADER}\n${ir}`);
+      await copyTextToClipboard(ir);
     }
 
     async copyAllStacksPlain(args, util) {

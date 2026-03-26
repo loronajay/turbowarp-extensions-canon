@@ -974,7 +974,7 @@
   function collectDeclaredVariables(node, out = new Map()) {
     if (!node || typeof node !== 'object') return out;
 
-    if (node.type === 'procedure') {
+    if (node.type === 'procedure' || node.type === 'script') {
       collectDeclaredVariables(node.body, out);
       return out;
     }

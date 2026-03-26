@@ -337,7 +337,7 @@ describe('exportAllStacksText', () => {
 });
 
 // ---------------------------------------------------------------------------
-// copyAllStacksToClipboard (with rules / spec header)
+// copyAllStacksToClipboard
 // ---------------------------------------------------------------------------
 
 describe('copyAllStacksToClipboard', () => {
@@ -350,7 +350,7 @@ describe('copyAllStacksToClipboard', () => {
     expect(writeText).not.toHaveBeenCalled();
   });
 
-  test('writes spec header + IR to clipboard', async () => {
+  test('writes plain IR to clipboard with no spec header', async () => {
     const writeText = jest.fn().mockResolvedValue(undefined);
     const { extension } = loadExtension('textify-turbowarp.js', {
       targets: [makeScriptTarget()],
@@ -359,22 +359,11 @@ describe('copyAllStacksToClipboard', () => {
     await extension.copyAllStacksToClipboard({ SPRITE: 'Sprite1' });
     expect(writeText).toHaveBeenCalledTimes(1);
     const payload = writeText.mock.calls[0][0];
-    expect(payload).toContain(IR_SPEC_HEADER);
     expect(payload).toContain('[script');
+    expect(payload).not.toContain(IR_SPEC_HEADER);
   });
 
-  test('IR in clipboard does not repeat the spec header inside the IR body', async () => {
-    const writeText = jest.fn().mockResolvedValue(undefined);
-    const { extension } = loadExtension('textify-turbowarp.js', {
-      targets: [makeScriptTarget()],
-      globals: makeTextifyGlobals(writeText)
-    });
-    await extension.copyAllStacksToClipboard({ SPRITE: 'Sprite1' });
-    const payload = writeText.mock.calls[0][0];
-    expect(payload.indexOf(IR_SPEC_HEADER)).toBe(0); // header is at the start only
-  });
-
-  test('updates getExportedIR without the spec header', async () => {
+  test('updates getExportedIR', async () => {
     const { extension } = loadExtension('textify-turbowarp.js', {
       targets: [makeScriptTarget()],
       globals: makeTextifyGlobals()

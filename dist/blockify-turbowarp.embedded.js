@@ -23214,7 +23214,7 @@ def ${E4.FUNCTION_NAME_PLACEHOLDER_}(text):
     }
     function collectDeclaredVariables(node, out = /* @__PURE__ */ new Map()) {
       if (!node || typeof node !== "object") return out;
-      if (node.type === "procedure") {
+      if (node.type === "procedure" || node.type === "script") {
         collectDeclaredVariables(node.body, out);
         return out;
       }

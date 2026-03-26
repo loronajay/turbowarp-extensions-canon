@@ -83,7 +83,6 @@ Google Gemini 3 v2 behavioral round 1 (2026-03-24): **partial** — tests 1–2 
 ## Known Limits
 
 - custom block (`[procedure]`) rendering not yet implemented in Blockify
-- no natural-language-to-patch layer yet
 - no project-wide wrapper IR root yet
 - no sprite creation ops yet
 - no logic-review/lint engine yet

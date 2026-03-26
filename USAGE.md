@@ -71,32 +71,9 @@ Paste this directly into your AI model's prompt. No manual rule-prepending neede
 
 If no valid IR has been exported yet, the block copies `no copied IR` instead.
 
-## Applying a patch in Blockify
+## Visualising AI output in Blockify
 
-1. Click the **Blockify Clipboard IR** button to open the patch workbench, or use the IR/patch buffer blocks directly.
-2. Paste the original IR into **Source IR**.
-3. Paste the AI-returned patch JSON into **Patch JSON**.
-4. Click **Apply Patch** to see the patched result and visual preview.
-5. Use **`copy last Blockify patched IR to clipboard`** to grab the result.
-
-### Patch JSON format (version 1)
-
-```json
-{
-  "version": 1,
-  "target": "project",
-  "operations": [
-    {
-      "op": "rename_variable",
-      "from": "score",
-      "to": "points",
-      "scope": "project"
-    }
-  ]
-}
-```
-
-See `PATCH_SCHEMA.md` for the full spec and all supported operations.
+After the AI returns edited IR, use Blockify's **`blockify clipboard contents`** block to render it visually. Paste the AI output to clipboard first, then run the block — it opens a floating panel with the scratch-blocks visual render of all stacks in the clipboard.
 
 ## Recommended script layout
 
@@ -105,17 +82,15 @@ when [r] pressed                         ← click-to-export + copy rules in one
   textify clicked block to clipboard
   copy rules with clipboard IR
 
-when [p] pressed                         ← open patch workbench
-  open Blockify IR editor
+when [p] pressed                         ← render clipboard IR visually
+  blockify clipboard contents
 ```
 
-## Validation blocks
-
-Use these to guard logic in your project scripts:
+## Utility blocks
 
 | Block | Returns |
 |---|---|
-| `validate Blockify IR [IR]` | `true` if the IR string parses without error |
-| `validate Blockify IR buffer` | `true` if the current IR buffer is valid |
+| `clipboard contents` | the current clipboard text |
+| `clipboard IR matches buffer` | `true` if clipboard IR matches the loaded buffer |
 | `last Blockify error` | last parse/validation error message, or empty |
-| `last Blockify patch error` | last patch apply error, or empty |
+| `exported IR` (Textify) | the last IR exported in this session |

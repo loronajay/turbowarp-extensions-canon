@@ -12,7 +12,7 @@ Scratch project → [Textify] → Textify IR → [AI model] → [Blockify] → S
 
 **Textify** exports any clicked block (serialized from the top of its stack) or all top-level stacks from a named sprite to Textify Canon IR and copies it to the clipboard.
 
-**Blockify** accepts Textify IR, validates it, applies AI-produced patch operations, and renders the result as visual Scratch blocks using an embedded scratch-blocks renderer.
+**Blockify** accepts Textify IR, validates it, and renders the result as visual Scratch blocks using an embedded scratch-blocks renderer.
 
 ## Textify Canon IR
 
@@ -89,7 +89,7 @@ This document defines all node types (`procedure`, `script`, `stack`, `opcode`, 
 | File | Purpose |
 |---|---|
 | `textify-turbowarp.js` | TurboWarp extension — exports IR, prepares AI payloads |
-| `blockify-turbowarp.js` | TurboWarp extension — parses, patches, and renders IR |
+| `blockify-turbowarp.js` | TurboWarp extension — parses, validates, and renders IR |
 | `dist/blockify-turbowarp.embedded.js` | Blockify bundled with scratch-blocks for visual rendering |
 | `IR_GRAMMAR.md` | Formal grammar spec — for AI models |
 | `IR_FULL_REFERENCE.md` | Full human reference — mutation rules, failure modes, examples |
