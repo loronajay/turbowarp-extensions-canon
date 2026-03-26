@@ -17,5 +17,19 @@
   "dependencies": {
     "blockly": "^12.5.1",
     "scratch-blocks": "^2.1.4"
-  }
+  },
+  "keywords": [
+  "scratch",
+  "turbowarp",
+  "textify-ir",
+  "blockify-ir",
+  "intermediate-representation",
+  "ir",
+  "ir-grammar",
+  "ai-mutation",
+  "code-generation",
+  "llm-optimization",
+  "ai-assisted-programming",
+  "block-based-programming"
+]
 }
