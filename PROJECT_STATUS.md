@@ -67,7 +67,7 @@ Implemented:
 - **`blockify clipboard contents`** command block: loads clipboard IR and renders all block stacks in it; previously named "load clipboard IR"
 - **`clipboard contents`** reporter block: reads the clipboard and returns its text, displayed in a value bubble when clicked
 - `Parser.parseAll()` — parses multiple root nodes from one IR string (enables multi-stack clipboard rendering)
-- multi-root rendering: all stacks loaded into a single scratch-blocks workspace via combined XML
+- multi-root rendering: all stacks loaded into a single scratch-blocks workspace via combined XML; stacks are spread horizontally with a configurable `margin` (default 400px) to prevent overlap
 - parser tolerates leading `# comment` lines (e.g. the spec header emitted by Textify)
 
 Embedded build artifact:

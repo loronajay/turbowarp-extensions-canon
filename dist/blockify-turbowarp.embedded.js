@@ -23335,18 +23335,23 @@ def ${E4.FUNCTION_NAME_PLACEHOLDER_}(text):
       const nextXml = bodyXml ? `<next>${bodyXml}</next>` : "";
       return `<xml xmlns="https://developers.google.com/blockly/xml">${variableDeclarations}<block type="procedures_definition"><statement name="custom_block"><block type="procedures_prototype">${procedureMutationXml(node)}</block></statement>${nextXml}</block></xml>`;
     }
-    function astToScratchBlocksXmlMulti(nodes) {
+    function astToScratchBlocksXmlMulti(nodes, margin = 400) {
       let allVarsXml = "";
       let allBlocksXml = "";
+      let xOffset = 0;
       for (const node of nodes) {
         allVarsXml += variablesXml(node);
+        let blockXml;
         if (node.type === "script") {
-          allBlocksXml += stackChainXml(node.body);
+          blockXml = stackChainXml(node.body);
         } else {
           const bodyXml = stackChainXml(node.body);
           const nextXml = bodyXml ? `<next>${bodyXml}</next>` : "";
-          allBlocksXml += `<block type="procedures_definition"><statement name="custom_block"><block type="procedures_prototype">${procedureMutationXml(node)}</block></statement>${nextXml}</block>`;
+          blockXml = `<block type="procedures_definition"><statement name="custom_block"><block type="procedures_prototype">${procedureMutationXml(node)}</block></statement>${nextXml}</block>`;
         }
+        blockXml = blockXml.replace(/^<block\b/, `<block x="${xOffset}" y="0"`);
+        allBlocksXml += blockXml;
+        xOffset += margin;
       }
       return `<xml xmlns="https://developers.google.com/blockly/xml">${allVarsXml}${allBlocksXml}</xml>`;
     }
