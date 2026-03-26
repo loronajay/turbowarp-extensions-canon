@@ -16,7 +16,7 @@ Scratch project → [Textify] → Textify IR → [AI model] → [Blockify] → S
 
 ## Textify Canon IR
 
-Textify Canon IR is the canonical text representation of Scratch/TurboWarp block programs used by this pipeline. Every IR snippet exported by Textify includes a spec header pointing to the grammar document:
+Textify Canon IR is the canonical text representation of Scratch/TurboWarp block programs used by this pipeline. IR snippets exported by Textify can include a spec header pointing to the grammar document with the "copy rules..." block:
 
 ```
 # Textify Canon IR — spec: https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_GRAMMAR.md
@@ -78,7 +78,7 @@ This document defines all node types (`procedure`, `script`, `stack`, `opcode`, 
 1. In Scratch/TurboWarp, use one of Textify's export blocks:
    - **`textify clicked block to clipboard`** — click any block in the editor to export its whole stack as IR
    - **`copy all stacks from sprite [SPRITE] to clipboard with rules`** — exports every top-level stack from a sprite, with spec header
-   - **`copy all stacks from sprite [SPRITE] plain`** — same, without spec header (for debugging)
+   - **`copy all stacks from sprite [SPRITE] plain`** — same, without spec header
 2. Optionally use Textify's **`copy rules with clipboard IR`** command — reads IR from clipboard, prepends the full mutation rules and grammar URL, writes back to clipboard
 3. Paste into an AI model (Gemini, ChatGPT, Claude, etc.)
 4. The model fetches `IR_GRAMMAR.md`, echoes the IR back, then waits for your mutation request
@@ -93,7 +93,6 @@ This document defines all node types (`procedure`, `script`, `stack`, `opcode`, 
 | `dist/blockify-turbowarp.embedded.js` | Blockify bundled with scratch-blocks for visual rendering |
 | `IR_GRAMMAR.md` | Formal grammar spec — for AI models |
 | `IR_FULL_REFERENCE.md` | Full human reference — mutation rules, failure modes, examples |
-| `PATCH_SCHEMA.md` | Patch JSON format specification |
 | `PROJECT_STATUS.md` | Implementation status and known limits |
 
 ## Development
