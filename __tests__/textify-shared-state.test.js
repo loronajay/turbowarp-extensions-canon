@@ -451,7 +451,7 @@ describe('Blockify loadClipboardIR', () => {
     const block = info.blocks.find(b => b.opcode === 'loadClipboardIR');
     expect(block).toBeDefined();
     expect(block.blockType).toBe('command');
-    expect(block.text).toBe('load clipboard IR');
+    expect(block.text).toBe('blockify clipboard contents');
   });
 });
 
