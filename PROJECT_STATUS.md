@@ -36,14 +36,13 @@ File: [textify-turbowarp.js](/Users/leoja/Desktop/Dad%20Games/turbowarp-extensio
 
 Implemented:
 
-- export custom block from sprite/current sprite
-- copy custom block IR to clipboard without popup (includes `# Textify Canon IR — spec:` header)
-- export top-level stack by index from sprite
-- copy top-level stack by index to clipboard (includes spec header)
-- top-level stack count by sprite
+- **`textify clicked block to clipboard`** — waits for the user to click any block in the editor; serializes from the top of the stack (whole stack always); reporters/booleans export as bare `[opcode:]` nodes; cancels on right-click, Escape, or Cancel button
+- **`copy all stacks from sprite [SPRITE] to clipboard with rules`** — exports all top-level stacks from a named sprite as `[script]` IR with spec header; procedure definitions excluded
+- **`copy all stacks from sprite [SPRITE] plain`** — same as above, no spec header (for debugging)
+- **`copy rules with clipboard IR`** — reads IR from clipboard, strips any spec header, prepends canonical AI mutation rules, copies merged payload back to clipboard; copies `no copied IR` if clipboard does not contain valid IR
+- **`exported IR`** reporter — returns the last IR exported in this session
 - explicit menu export support for `looks_backdrops` and `looks_costume`
 - publishes last export to `globalThis.__TEXTIFY_SHARED__` for cross-extension reads
-- **`copy rules with clipboard IR`** command block: reads IR from clipboard, strips any spec header, prepends the canonical AI mutation rules, and copies the merged payload back to clipboard; copies `no copied IR` if clipboard does not contain valid IR
 
 ### Blockify
 
@@ -65,7 +64,10 @@ Implemented:
   - `Patched IR Result`
   - visual preview
 - button row pinned at the bottom of the editor
+- **`blockify clipboard contents`** command block: loads clipboard IR and renders all block stacks in it; previously named "load clipboard IR"
 - **`clipboard contents`** reporter block: reads the clipboard and returns its text, displayed in a value bubble when clicked
+- `Parser.parseAll()` — parses multiple root nodes from one IR string (enables multi-stack clipboard rendering)
+- multi-root rendering: all stacks loaded into a single scratch-blocks workspace via combined XML
 - parser tolerates leading `# comment` lines (e.g. the spec header emitted by Textify)
 
 Embedded build artifact:
@@ -162,20 +164,25 @@ These return structured results:
 Current Jest status at this checkpoint:
 
 - `15` test suites passing
-- `89` tests passing
+- `109` tests passing
 
 Coverage currently includes:
 
 - camera/leaderboards regressions
 - embedded `scratch-blocks` rendering regressions
 - script root support
-- textify top-level stack export
+- Textify block registration (all remaining blocks)
+- `getStackRoot` helper (next-chain, SUBSTACK, reporter, detached, unknown)
+- `exportAllStacksText` (empty target, single stack, multi-stack, procedure exclusion)
+- `copyAllStacksToClipboard` / `copyAllStacksPlain` (sprite lookup, clipboard payload, shared state)
+- `getExportedIR` reporter
+- `textifyClickedBlock` (graceful no-op when ScratchBlocks unavailable)
 - patch engine operations
 - patch workflow state behavior
 - editor layout behavior
 - Textify/Blockify shared state bridge (`__TEXTIFY_SHARED__`)
-- `copyRulesWithClipboardIR` block behavior (all cases, now in Textify)
-- `readClipboard` reporter block behavior
+- `copyRulesWithClipboardIR` block behavior (all cases)
+- `readClipboard` / `loadClipboardIR` / `clipboardIRMatchesBuffer` block behavior
 
 ## Next Likely Steps
 

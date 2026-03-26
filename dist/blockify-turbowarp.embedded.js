@@ -22421,6 +22421,27 @@ def ${E4.FUNCTION_NAME_PLACEHOLDER_}(text):
         this.validateRoot(root);
         return root;
       }
+      parseAll() {
+        this.stripHeaderComments();
+        const roots = [];
+        this.skipWS();
+        while (this.i < this.n) {
+          const node = this.parseBracketNode();
+          if (!node) break;
+          let root = node;
+          if (node.type === "opcode") {
+            root = { type: "script", body: { type: "stack", children: [node] } };
+          } else if (node.type === "stack") {
+            root = { type: "script", body: node };
+          } else if (node.type !== "procedure" && node.type !== "script") {
+            throw new ValidationError("Root node must be procedure, script, stack, or opcode");
+          }
+          this.validateRoot(root);
+          roots.push(root);
+          this.skipWS();
+        }
+        return roots;
+      }
       peek(s2) {
         return this.text.startsWith(s2, this.i);
       }
@@ -23314,6 +23335,21 @@ def ${E4.FUNCTION_NAME_PLACEHOLDER_}(text):
       const nextXml = bodyXml ? `<next>${bodyXml}</next>` : "";
       return `<xml xmlns="https://developers.google.com/blockly/xml">${variableDeclarations}<block type="procedures_definition"><statement name="custom_block"><block type="procedures_prototype">${procedureMutationXml(node)}</block></statement>${nextXml}</block></xml>`;
     }
+    function astToScratchBlocksXmlMulti(nodes) {
+      let allVarsXml = "";
+      let allBlocksXml = "";
+      for (const node of nodes) {
+        allVarsXml += variablesXml(node);
+        if (node.type === "script") {
+          allBlocksXml += stackChainXml(node.body);
+        } else {
+          const bodyXml = stackChainXml(node.body);
+          const nextXml = bodyXml ? `<next>${bodyXml}</next>` : "";
+          allBlocksXml += `<block type="procedures_definition"><statement name="custom_block"><block type="procedures_prototype">${procedureMutationXml(node)}</block></statement>${nextXml}</block>`;
+        }
+      }
+      return `<xml xmlns="https://developers.google.com/blockly/xml">${allVarsXml}${allBlocksXml}</xml>`;
+    }
     function registerDynamicMenuOutputBlocks(scratchBlocks) {
       if (!scratchBlocks || !scratchBlocks.Blocks) return;
       for (const opcode of Object.keys(DYNAMIC_MENU_OUTPUT_SPECS)) {
@@ -23553,6 +23589,76 @@ def ${E4.FUNCTION_NAME_PLACEHOLDER_}(text):
         return false;
       }
     }
+    function renderMultipleWithScratchBlocks(root, nodes, scratchBlocks) {
+      if (!root || !nodes || !nodes.length || !scratchBlocks || typeof scratchBlocks.inject !== "function") {
+        if (root && root.dataset) {
+          root.dataset.renderMode = "fallback";
+          root.dataset.renderError = "scratch-blocks unavailable";
+        }
+        return false;
+      }
+      try {
+        ensureScratchBlocksReady(scratchBlocks);
+        while (root.firstChild) root.removeChild(root.firstChild);
+        const host = document.createElement("div");
+        host.className = "bfv-scratch-workspace";
+        host.style.width = "100%";
+        host.style.position = "relative";
+        if (root.dataset && root.dataset.viewportFill === "true") {
+          host.style.height = "100%";
+          host.style.minHeight = "100%";
+        } else {
+          host.style.height = "400px";
+          host.style.minHeight = "400px";
+        }
+        root.appendChild(host);
+        const workspace = scratchBlocks.inject(host, {
+          readOnly: true,
+          theme: createScratchPreviewTheme(),
+          scratchTheme: scratchBlocks.ScratchBlocksTheme && scratchBlocks.ScratchBlocksTheme.CLASSIC ? scratchBlocks.ScratchBlocksTheme.CLASSIC : "classic",
+          scrollbars: true,
+          trashcan: false,
+          zoom: { controls: false, wheel: true, startScale: 0.75, maxScale: 2, minScale: 0.2 },
+          move: { drag: true, wheel: true, scrollbars: true }
+        });
+        const textToDom = scratchBlocks.utils && scratchBlocks.utils.xml && typeof scratchBlocks.utils.xml.textToDom === "function" ? scratchBlocks.utils.xml.textToDom : scratchBlocks.Xml && typeof scratchBlocks.Xml.textToDom === "function" ? scratchBlocks.Xml.textToDom : null;
+        if (!textToDom || !scratchBlocks.Xml || typeof scratchBlocks.Xml.domToWorkspace !== "function") {
+          throw new Error("scratch-blocks XML APIs unavailable");
+        }
+        const xmlText = astToScratchBlocksXmlMulti(nodes);
+        const xmlDom = textToDom(xmlText);
+        scratchBlocks.Xml.domToWorkspace(xmlDom, workspace);
+        let topBlocks = [];
+        if (typeof workspace.getTopBlocks === "function") {
+          topBlocks = workspace.getTopBlocks(false) || [];
+        }
+        runEmbeddedWorkspaceLayoutPass(workspace, scratchBlocks, topBlocks);
+        if (typeof requestAnimationFrame === "function") {
+          requestAnimationFrame(() => runEmbeddedWorkspaceLayoutPass(workspace, scratchBlocks, topBlocks));
+        }
+        const cssDiagnostics = getBlocklyStyleDiagnostics(document);
+        if (root.dataset) {
+          root.dataset.renderMode = "embedded-multi";
+          root.dataset.renderError = "";
+          root.dataset.blockCount = String(topBlocks.length);
+          root.dataset.commonCssInjected = cssDiagnostics.commonCssInjected;
+          root.dataset.rendererCssInjected = cssDiagnostics.rendererCssInjected;
+          root.dataset.rendererCssIds = cssDiagnostics.rendererCssIds;
+        }
+        return true;
+      } catch (err) {
+        const cssDiagnostics = getBlocklyStyleDiagnostics(document);
+        if (root.dataset) {
+          root.dataset.renderMode = "fallback";
+          root.dataset.renderError = err && err.message ? err.message : String(err);
+          root.dataset.blockCount = "0";
+          root.dataset.commonCssInjected = cssDiagnostics.commonCssInjected;
+          root.dataset.rendererCssInjected = cssDiagnostics.rendererCssInjected;
+          root.dataset.rendererCssIds = cssDiagnostics.rendererCssIds;
+        }
+        return false;
+      }
+    }
     function buildEditorStatusText(owner) {
       const errorText = owner.lastError ? `ERROR:
 ${owner.lastError}` : "ERROR:\n[none]";
@@ -23597,12 +23703,25 @@ ${owner.lastVisualCssStatus}` : "\n\nVISUAL CSS:\n[none]";
       visual.innerHTML = "";
       try {
         const parser = new Parser(irText);
-        const ast = parser.parse();
+        const roots = parser.parseAll();
         injectVisualStyles();
         const scratchBlocks = typeof globalThis !== "undefined" ? globalThis.__blockifyScratchBlocks : null;
-        if (!renderProcedureWithScratchBlocks(visual, ast, scratchBlocks)) {
-          const vr = new VisualRenderer(visual);
-          vr.renderProcedure(ast);
+        if (roots.length === 1) {
+          if (!renderProcedureWithScratchBlocks(visual, roots[0], scratchBlocks)) {
+            const vr = new VisualRenderer(visual);
+            vr.renderProcedure(roots[0]);
+          }
+        } else if (roots.length > 1) {
+          if (!renderMultipleWithScratchBlocks(visual, roots, scratchBlocks)) {
+            visual.innerHTML = "";
+            for (const ast of roots) {
+              const container = document.createElement("div");
+              container.style.marginBottom = "12px";
+              visual.appendChild(container);
+              const vr = new VisualRenderer(container);
+              vr.renderProcedure(ast);
+            }
+          }
         }
         owner.lastVisualRenderMode = visual.dataset && visual.dataset.renderMode ? visual.dataset.renderMode : "";
         owner.lastVisualRenderError = visual.dataset && visual.dataset.renderError ? visual.dataset.renderError : "";
@@ -24374,8 +24493,15 @@ ${msg}</div>`;
         "Blockify Clipboard Preview"
       );
       owner.setBufferText(irText);
-      owner.validateIR({ IR: irText });
-      owner.renderIR({ IR: irText });
+      try {
+        owner.validateIR({ IR: irText });
+      } catch {
+      }
+      try {
+        owner.renderIR({ IR: irText });
+      } catch {
+      }
+      ;
       const visual = document.createElement("div");
       visual.dataset.viewportFill = "true";
       visual.style.cssText = [
@@ -24657,7 +24783,7 @@ ${message}</div>`;
             {
               opcode: "loadClipboardIR",
               blockType: Scratch2.BlockType.COMMAND,
-              text: "load clipboard IR"
+              text: "blockify clipboard contents"
             },
             {
               opcode: "clipboardIRMatchesBuffer",

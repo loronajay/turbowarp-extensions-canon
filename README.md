@@ -10,7 +10,7 @@ Two TurboWarp extensions form a round-trip pipeline:
 Scratch project → [Textify] → Textify IR → [AI model] → [Blockify] → Scratch blocks
 ```
 
-**Textify** exports custom blocks and top-level scripts from a running Scratch/TurboWarp project to Textify Canon IR and copies it to the clipboard.
+**Textify** exports any clicked block (serialized from the top of its stack) or all top-level stacks from a named sprite to Textify Canon IR and copies it to the clipboard.
 
 **Blockify** accepts Textify IR, validates it, applies AI-produced patch operations, and renders the result as visual Scratch blocks using an embedded scratch-blocks renderer.
 
@@ -75,8 +75,11 @@ This document defines all node types (`procedure`, `script`, `stack`, `opcode`, 
 
 ## AI Mutation Workflow
 
-1. In Scratch/TurboWarp, use Textify's **copy custom block to clipboard** command — copies IR with spec header to clipboard
-2. Use Textify's **copy rules with clipboard IR** command — prepends the full mutation rules and grammar URL, writes back to clipboard
+1. In Scratch/TurboWarp, use one of Textify's export blocks:
+   - **`textify clicked block to clipboard`** — click any block in the editor to export its whole stack as IR
+   - **`copy all stacks from sprite [SPRITE] to clipboard with rules`** — exports every top-level stack from a sprite, with spec header
+   - **`copy all stacks from sprite [SPRITE] plain`** — same, without spec header (for debugging)
+2. Optionally use Textify's **`copy rules with clipboard IR`** command — reads IR from clipboard, prepends the full mutation rules and grammar URL, writes back to clipboard
 3. Paste into an AI model (Gemini, ChatGPT, Claude, etc.)
 4. The model fetches `IR_GRAMMAR.md`, echoes the IR back, then waits for your mutation request
 5. Paste the model's output back into Blockify's Source IR pane to preview and validate

@@ -16,36 +16,37 @@ In TurboWarp, load both extensions as **unsandboxed** custom extensions:
 
 ## Exporting IR from Textify
 
-### Export a custom block
+### Click-to-export any block
 
-Use one of these Textify blocks in a script:
+Use **`textify clicked block to clipboard`** in a script. When it runs, it waits for you to click any block in the editor. The whole stack is serialized from the top (so clicking a block in the middle of a script still exports the complete script). Reporters and boolean blocks clicked directly export as a bare `[opcode:]` node. The result is copied to clipboard with the spec header and stored in `__TEXTIFY_SHARED__`.
 
-| Block | What it does |
-|---|---|
-| `export custom block [PROCNAME] from [SPRITE]` | Shows IR in a popup |
-| `copy custom block [PROCNAME] from [SPRITE] to clipboard` | Copies IR silently |
-| `export custom block [PROCNAME] from current sprite` | Shows IR in a popup |
-| `copy custom block [PROCNAME] from current sprite to clipboard` | Copies IR silently |
+Cancel the click by right-clicking, pressing Escape, or clicking the Cancel button that appears.
 
-After any of these run, Textify stores the result in `__TEXTIFY_SHARED__` so Blockify can read it.
-
-### Export a top-level stack
+### Export all stacks from a sprite
 
 | Block | What it does |
 |---|---|
-| `export top-level stack [INDEX] from [SPRITE]` | Shows IR in a popup |
-| `copy top-level stack [INDEX] from [SPRITE] to clipboard` | Copies IR silently |
+| `copy all stacks from sprite [SPRITE] to clipboard with rules` | Copies IR for every top-level stack, with spec header |
+| `copy all stacks from sprite [SPRITE] plain` | Same IR, no spec header (useful for debugging) |
 
-`INDEX` is 1-based. Use `count top-level stacks in [SPRITE]` to find how many exist.
+Procedure definition blocks are excluded from both. All exported IR is stored in `__TEXTIFY_SHARED__` so Blockify can read it.
 
 ## Sending IR to an AI model
 
-After exporting, use Blockify's **`copy rules with exported IR`** block:
+After exporting, use Textify's **`copy rules with clipboard IR`** block:
 
 ```
 when [key] pressed
-  export custom block [my block] from current sprite    ← Textify
-  copy rules with exported IR                            ← Blockify
+  textify clicked block to clipboard                    ← Textify (click a block)
+  copy rules with clipboard IR                          ← Textify
+```
+
+Or for a sprite-wide export:
+
+```
+when [key] pressed
+  copy all stacks from sprite [Sprite1] to clipboard with rules   ← Textify
+  copy rules with clipboard IR                                     ← Textify
 ```
 
 This copies a merged payload to clipboard:
@@ -100,9 +101,9 @@ See `PATCH_SCHEMA.md` for the full spec and all supported operations.
 ## Recommended script layout
 
 ```
-when [r] pressed                         ← export + copy rules in one keypress
-  export custom block [my block] from current sprite
-  copy rules with exported IR
+when [r] pressed                         ← click-to-export + copy rules in one keypress
+  textify clicked block to clipboard
+  copy rules with clipboard IR
 
 when [p] pressed                         ← open patch workbench
   open Blockify IR editor
