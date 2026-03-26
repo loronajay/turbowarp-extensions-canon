@@ -323,6 +323,17 @@ describe('exportAllStacksText', () => {
     expect(result).not.toContain('procedures_definition');
     expect(result).toContain('events_whenflagclicked');
   });
+
+  test('excludes the stack with the given excludeId', () => {
+    const result = hooks.exportAllStacksText(makeMultiStackTarget(), 'hat1');
+    expect(result).not.toContain('events_whenflagclicked');
+    expect(result).toContain('event_whenkeypressed');
+  });
+
+  test('returns empty string when the only stack is excluded', () => {
+    const result = hooks.exportAllStacksText(makeScriptTarget(), 'hat1');
+    expect(result).toBe('');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -383,6 +394,19 @@ describe('copyAllStacksToClipboard', () => {
     const shared = context.__TEXTIFY_SHARED__ || context.globalThis.__TEXTIFY_SHARED__;
     expect(shared.lastExportText).toContain('[script');
   });
+
+  test('excludes the stack identified by util.thread.topBlock', async () => {
+    const writeText = jest.fn().mockResolvedValue(undefined);
+    const { extension } = loadExtension('textify-turbowarp.js', {
+      targets: [makeMultiStackTarget()],
+      globals: makeTextifyGlobals(writeText)
+    });
+    const util = { thread: { topBlock: 'hat1' } };
+    await extension.copyAllStacksToClipboard({ SPRITE: 'Sprite1' }, util);
+    const payload = writeText.mock.calls[0][0];
+    expect(payload).not.toContain('events_whenflagclicked');
+    expect(payload).toContain('event_whenkeypressed');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -429,6 +453,19 @@ describe('copyAllStacksPlain', () => {
     await extension.copyAllStacksPlain({ SPRITE: 'Sprite1' });
     const shared = context.__TEXTIFY_SHARED__ || context.globalThis.__TEXTIFY_SHARED__;
     expect(shared.lastExportText).toContain('[script');
+  });
+
+  test('excludes the stack identified by util.thread.topBlock', async () => {
+    const writeText = jest.fn().mockResolvedValue(undefined);
+    const { extension } = loadExtension('textify-turbowarp.js', {
+      targets: [makeMultiStackTarget()],
+      globals: makeTextifyGlobals(writeText)
+    });
+    const util = { thread: { topBlock: 'hat2' } };
+    await extension.copyAllStacksPlain({ SPRITE: 'Sprite1' }, util);
+    const payload = writeText.mock.calls[0][0];
+    expect(payload).toContain('events_whenflagclicked');
+    expect(payload).not.toContain('event_whenkeypressed');
   });
 });
 

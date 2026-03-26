@@ -37,8 +37,8 @@ File: [textify-turbowarp.js](/Users/leoja/Desktop/Dad%20Games/turbowarp-extensio
 Implemented:
 
 - **`textify clicked block to clipboard`** — waits for the user to click any block in the editor; serializes from the top of the stack (whole stack always); reporters/booleans export as bare `[opcode:]` nodes; cancels on right-click, Escape, or Cancel button
-- **`copy all stacks from sprite [SPRITE] to clipboard with rules`** — exports all top-level stacks from a named sprite as `[script]` IR with spec header; procedure definitions excluded
-- **`copy all stacks from sprite [SPRITE] plain`** — same as above, no spec header (for debugging)
+- **`copy all stacks from sprite [SPRITE] to clipboard with rules`** — exports all top-level stacks from a named sprite as `[script]` IR with spec header; procedure definitions excluded; the running script excludes itself via `util.thread.topBlock`
+- **`copy all stacks from sprite [SPRITE] plain`** — same as above, no spec header (for debugging); also self-excluding
 - **`copy rules with clipboard IR`** — reads IR from clipboard, strips any spec header, prepends canonical AI mutation rules, copies merged payload back to clipboard; copies `no copied IR` if clipboard does not contain valid IR
 - **`exported IR`** reporter — returns the last IR exported in this session
 - explicit menu export support for `looks_backdrops` and `looks_costume`
@@ -164,7 +164,7 @@ These return structured results:
 Current Jest status at this checkpoint:
 
 - `15` test suites passing
-- `109` tests passing
+- `113` tests passing
 
 Coverage currently includes:
 
@@ -174,7 +174,7 @@ Coverage currently includes:
 - Textify block registration (all remaining blocks)
 - `getStackRoot` helper (next-chain, SUBSTACK, reporter, detached, unknown)
 - `exportAllStacksText` (empty target, single stack, multi-stack, procedure exclusion)
-- `copyAllStacksToClipboard` / `copyAllStacksPlain` (sprite lookup, clipboard payload, shared state)
+- `copyAllStacksToClipboard` / `copyAllStacksPlain` (sprite lookup, clipboard payload, shared state, self-exclusion via util)
 - `getExportedIR` reporter
 - `textifyClickedBlock` (graceful no-op when ScratchBlocks unavailable)
 - patch engine operations

@@ -582,8 +582,8 @@ IR:
     }
   }
 
-  function exportAllStacksText(target) {
-    const stackIds = getTopLevelStackIds(target);
+  function exportAllStacksText(target, excludeId) {
+    const stackIds = getTopLevelStackIds(target).filter(id => id !== excludeId);
     if (!stackIds.length) return '';
     return stackIds.map(id => serializeScript(target, id)).join('\n\n');
   }
@@ -758,25 +758,27 @@ IR:
       await copyTextToClipboard(`${IR_SPEC_HEADER}\n${ir}`);
     }
 
-    async copyAllStacksToClipboard(args) {
+    async copyAllStacksToClipboard(args, util) {
       const target = getTargetByName(args.SPRITE);
       if (!target) {
         lastExportText = `Sprite not found: ${args.SPRITE}`;
         return;
       }
-      const ir = exportAllStacksText(target);
+      const excludeId = util && util.thread && util.thread.topBlock;
+      const ir = exportAllStacksText(target, excludeId);
       lastExportText = ir;
       globalThis.__TEXTIFY_SHARED__.lastExportText = ir;
       await copyTextToClipboard(`${IR_SPEC_HEADER}\n${ir}`);
     }
 
-    async copyAllStacksPlain(args) {
+    async copyAllStacksPlain(args, util) {
       const target = getTargetByName(args.SPRITE);
       if (!target) {
         lastExportText = `Sprite not found: ${args.SPRITE}`;
         return;
       }
-      const ir = exportAllStacksText(target);
+      const excludeId = util && util.thread && util.thread.topBlock;
+      const ir = exportAllStacksText(target, excludeId);
       lastExportText = ir;
       globalThis.__TEXTIFY_SHARED__.lastExportText = ir;
       await copyTextToClipboard(ir);
