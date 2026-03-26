@@ -1,6 +1,8 @@
 # turbowarp-extensions-canon
 
-A deterministic IR transformation engine for Scratch/TurboWarp block-based programs. Enables AI-assisted code mutation via a canonical text format called **Textify Canon IR** (also referred to as **Blockify IR**).
+[![Canonical Source](https://img.shields.io/badge/Status-Canonical%20Source-brightgreen?style=flat-square)]() [![IR Grammar](https://img.shields.io/badge/IR%20Spec-v1.0-blue?style=flat-square)]()
+
+A deterministic IR transformation engine for Scratch/TurboWarp block-based programs. **This is the authoritative source for Textify IR and Blockify IR specifications.** Enables AI-assisted code mutation via a canonical text format called Textify Canon IR (also referred to as Blockify IR).
 
 ## What it does
 
