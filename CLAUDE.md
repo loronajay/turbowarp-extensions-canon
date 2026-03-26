@@ -24,6 +24,7 @@ This project is a **deterministic IR transformation engine** for Scratch/TurboWa
 
 ```
 Scratch project → [Textify] → IR text → [AI/User] → patch JSON → [Blockify] → Scratch XML
+                                         ↓ also accepts bare [stack:] / [opcode:] fragments
 ```
 
 1. **`textify-turbowarp.js`** — Adapter A. Exports custom blocks and top-level stacks from a running Scratch project to canonical IR text. Copies to clipboard.
@@ -32,10 +33,12 @@ Scratch project → [Textify] → IR text → [AI/User] → patch JSON → [Bloc
 
 ### Canonical IR grammar
 
+Full spec: `IR_GRAMMAR.md`. Quick reference:
+
 ```
 [procedure
   proccode:"NAME %s"
-  argumentnames:[arg1]
+  argumentnames:["arg1"]
   argumentdefaults:[""]
   warp:false
   body:[stack: ...]
@@ -53,9 +56,13 @@ Scratch project → [Textify] → IR text → [AI/User] → patch JSON → [Bloc
   ...
 ]
 
-[literal:type:value]
-[menu:opcode:field:value]
+[literal:number:10]
+[literal:string:"hello"]
+[literal:boolean:true]
+[menu:opcode:"value"]
 ```
+
+Blockify also accepts bare `[stack:]` or `[opcode:...]` as roots (wrapped into a synthetic script).
 
 Both textify and blockify use hand-written recursive-descent parsers (`parseIdentifier`, `parseString`, `parseBracketNode`, etc.) with custom error classes (`ParseError`, `ValidationError`).
 
@@ -92,3 +99,5 @@ Key test files:
 - `PROJECT_STATUS.md` — current implementation status and known limits
 - `PATCH_SCHEMA.md` — patch JSON format specification
 - `AI_MUTATION_BENCHMARKS.md` — canonical AI mutation test cases
+- `IR_GRAMMAR.md` — machine-optimized formal grammar spec; the URL sent to AI models
+- `IR_FULL_REFERENCE.md` — human-readable full reference with mutation rules, failure modes, and examples

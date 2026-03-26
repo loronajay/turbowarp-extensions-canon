@@ -22363,17 +22363,6 @@ def ${E4.FUNCTION_NAME_PLACEHOLDER_}(text):
     if (!Scratch2.extensions.unsandboxed) {
       throw new Error("Blockify Phase 1 must be loaded unsandboxed.");
     }
-    const AI_MUTATION_RULES = `You are modifying Textify canon IR.
-
-Before responding, fetch and read the full grammar specification at:
-https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_GRAMMAR.md
-
-Follow all rules and grammar defined in that document exactly.
-
-When you receive the IR below, do not make any modifications yet. First, repeat the IR back exactly as provided, then wait for a modification request.
-
-IR:
-`;
     function getLastExportedIR() {
       const shared = globalThis.__TEXTIFY_SHARED__ || null;
       if (!shared) return "";
@@ -22381,7 +22370,7 @@ IR:
     }
     function hasValidExportedIR() {
       const text = getLastExportedIR().trim();
-      return text.startsWith("[procedure") || text.startsWith("[script");
+      return text.startsWith("[procedure") || text.startsWith("[script") || text.startsWith("[stack") || text.startsWith("[opcode");
     }
     class ParseError extends Error {
       constructor(message) {
@@ -22404,18 +22393,33 @@ IR:
         this.i = 0;
         this.n = this.text.length;
       }
+      stripHeaderComments() {
+        while (this.i < this.n && this.text[this.i] === "#") {
+          while (this.i < this.n && this.text[this.i] !== "\n") this.i++;
+          if (this.i < this.n) this.i++;
+        }
+      }
       parse() {
+        this.stripHeaderComments();
         this.skipWS();
         const node = this.parseBracketNode();
         this.skipWS();
         if (this.i !== this.n) {
           throw new ParseError(`Unexpected trailing content at index ${this.i}`);
         }
-        if (!node || node.type !== "procedure" && node.type !== "script") {
-          throw new ValidationError("Root node must be procedure or script");
+        if (!node) {
+          throw new ValidationError("Root node must be procedure, script, stack, or opcode");
         }
-        this.validateRoot(node);
-        return node;
+        let root = node;
+        if (node.type === "opcode") {
+          root = { type: "script", body: { type: "stack", children: [node] } };
+        } else if (node.type === "stack") {
+          root = { type: "script", body: node };
+        } else if (node.type !== "procedure" && node.type !== "script") {
+          throw new ValidationError("Root node must be procedure, script, stack, or opcode");
+        }
+        this.validateRoot(root);
+        return root;
       }
       peek(s2) {
         return this.text.startsWith(s2, this.i);
@@ -23093,10 +23097,10 @@ IR:
       sensing_current: { shape: "reporter-round", category: "sensing", tokens: ["current", { field: "CURRENTMENU" }] },
       sensing_dayssince2000: { shape: "reporter-round", category: "sensing", tokens: ["days since 2000"] },
       sensing_username: { shape: "reporter-round", category: "sensing", tokens: ["username"] },
-      operator_add: { shape: "reporter-round", category: "operators", tokens: [{ input: "NUM1", shape: "round" }, "+", { input: "NUM2", shape: "round" }] },
-      operator_subtract: { shape: "reporter-round", category: "operators", tokens: [{ input: "NUM1", shape: "round" }, "-", { input: "NUM2", shape: "round" }] },
-      operator_multiply: { shape: "reporter-round", category: "operators", tokens: [{ input: "NUM1", shape: "round" }, "*", { input: "NUM2", shape: "round" }] },
-      operator_divide: { shape: "reporter-round", category: "operators", tokens: [{ input: "NUM1", shape: "round" }, "/", { input: "NUM2", shape: "round" }] },
+      operator_add: { shape: "reporter-round", category: "operators", tokens: [{ slot: ["NUM1", "OPERAND1"], shape: "round" }, "+", { slot: ["NUM2", "OPERAND2"], shape: "round" }] },
+      operator_subtract: { shape: "reporter-round", category: "operators", tokens: [{ slot: ["NUM1", "OPERAND1"], shape: "round" }, "-", { slot: ["NUM2", "OPERAND2"], shape: "round" }] },
+      operator_multiply: { shape: "reporter-round", category: "operators", tokens: [{ slot: ["NUM1", "OPERAND1"], shape: "round" }, "*", { slot: ["NUM2", "OPERAND2"], shape: "round" }] },
+      operator_divide: { shape: "reporter-round", category: "operators", tokens: [{ slot: ["NUM1", "OPERAND1"], shape: "round" }, "/", { slot: ["NUM2", "OPERAND2"], shape: "round" }] },
       operator_random: { shape: "reporter-round", category: "operators", tokens: ["pick random", { input: "FROM", shape: "round" }, "to", { input: "TO", shape: "round" }] },
       operator_gt: { shape: "reporter-boolean", category: "operators", tokens: [{ input: "OPERAND1", shape: "round" }, ">", { input: "OPERAND2", shape: "round" }] },
       operator_lt: { shape: "reporter-boolean", category: "operators", tokens: [{ input: "OPERAND1", shape: "round" }, "<", { input: "OPERAND2", shape: "round" }] },
@@ -23254,9 +23258,21 @@ IR:
       if (node.type === "menu") return menuShadowXml(node);
       return opcodeBlockXml(node);
     }
+    const OPERAND_TO_NUM_OPCODES = /* @__PURE__ */ new Set([
+      "operator_add",
+      "operator_subtract",
+      "operator_multiply",
+      "operator_divide"
+    ]);
+    function resolveInputName(opcode, name2) {
+      if (!OPERAND_TO_NUM_OPCODES.has(opcode)) return name2;
+      if (name2 === "OPERAND1") return "NUM1";
+      if (name2 === "OPERAND2") return "NUM2";
+      return name2;
+    }
     function inputListXml(node) {
       const inputs = node.inputs || {};
-      return Object.keys(inputs).sort().map((name2) => `<value name="${escapeXmlAttr(name2)}">${inputNodeXml(inputs[name2])}</value>`).join("");
+      return Object.keys(inputs).sort().map((name2) => `<value name="${escapeXmlAttr(resolveInputName(node.opcode, name2))}">${inputNodeXml(inputs[name2])}</value>`).join("");
     }
     function fieldListXml(node) {
       const fields = node.fields || {};
@@ -23907,6 +23923,14 @@ ${msg}</div>`;
         return "command";
       }
       renderLiteral(node, context = null) {
+        if (node.valueType === "string") {
+          const block = this.el("span", "bfv-round-block");
+          this.addCategoryClass(block, "data");
+          block.dataset.nodeKind = "literal";
+          block.dataset.literalType = node.valueType;
+          block.textContent = String(node.value);
+          return block;
+        }
         const literal = this.el("span", "bfv-literal-slot");
         literal.dataset.nodeKind = "literal";
         literal.dataset.literalType = node.valueType;
@@ -24641,11 +24665,6 @@ ${message}</div>`;
               text: "clipboard IR matches buffer"
             },
             {
-              opcode: "copyRulesWithClipboardIR",
-              blockType: Scratch2.BlockType.COMMAND,
-              text: "copy rules with clipboard IR"
-            },
-            {
               opcode: "readClipboard",
               blockType: Scratch2.BlockType.REPORTER,
               text: "clipboard contents"
@@ -24742,14 +24761,6 @@ ${message}</div>`;
         const matches = text === (this.irBuffer || "").trim();
         showIRPreviewOnly(this, text, matches ? "matches buffer \u2713" : "MISMATCH \u2717");
         return matches;
-      }
-      async copyRulesWithClipboardIR() {
-        const ir = (await readClipboardText()).trim();
-        if (!ir.startsWith("[procedure") && !ir.startsWith("[script")) {
-          await copyTextToClipboard("no copied IR");
-          return;
-        }
-        await copyTextToClipboard(`${AI_MUTATION_RULES}${ir}`);
       }
       async readClipboard() {
         return readClipboardText();

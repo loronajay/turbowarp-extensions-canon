@@ -7,7 +7,7 @@ This repo is now beyond simple export/render tooling. It currently supports:
 - `Textify` export of custom blocks as `[procedure]` IR
 - `Textify` export of any top-level stack as `[script]` IR
 - direct clipboard-copy workflows for both custom blocks and top-level stacks
-- `Blockify` parsing, validating, and rendering of `[procedure]` and `[script]` IR
+- `Blockify` parsing, validating, and rendering of `[procedure]`, `[script]`, `[stack:]`, and bare `[opcode:]` IR
 - embedded `scratch-blocks` rendering through `dist/blockify-turbowarp.embedded.js`
 - a dual-buffer patch workbench inside the Blockify editor
 - a first internal patch engine with deterministic apply/serialize/validate behavior
@@ -16,8 +16,8 @@ This repo is now beyond simple export/render tooling. It currently supports:
 
 The intended workflow right now is:
 
-1. Use `Textify` to export a custom block or top-level stack to IR.
-2. Use Blockify's **`copy rules with exported IR`** block to copy the AI mutation prompt (rules + IR) to clipboard in one step.
+1. Use `Textify` to export a custom block or top-level stack to IR (copies to clipboard with spec header).
+2. Use Textify's **`copy rules with clipboard IR`** block to prepend the canonical AI mutation rules to whatever IR is on the clipboard, and copy the merged payload back to clipboard in one step.
 3. Paste into an AI model.
 4. Have the model produce patch JSON or edited IR.
 5. Open `Blockify`.
@@ -26,7 +26,7 @@ The intended workflow right now is:
 8. Apply patch and inspect the visual result.
 9. Copy the patched IR or use it as the new source.
 
-Step 2 replaces the previous manual step of copying IR and prepending mutation rules by hand.
+Step 2 reads from the clipboard directly, so there is no distinction between Textify-exported IR and any other IR source. The `copy rules with clipboard IR` block lives in Textify because it belongs to the export/AI-handoff side of the pipeline.
 
 ## Implemented
 
@@ -37,12 +37,13 @@ File: [textify-turbowarp.js](/Users/leoja/Desktop/Dad%20Games/turbowarp-extensio
 Implemented:
 
 - export custom block from sprite/current sprite
-- copy custom block IR to clipboard without popup
+- copy custom block IR to clipboard without popup (includes `# Textify Canon IR — spec:` header)
 - export top-level stack by index from sprite
-- copy top-level stack by index to clipboard
+- copy top-level stack by index to clipboard (includes spec header)
 - top-level stack count by sprite
 - explicit menu export support for `looks_backdrops` and `looks_costume`
 - publishes last export to `globalThis.__TEXTIFY_SHARED__` for cross-extension reads
+- **`copy rules with clipboard IR`** command block: reads IR from clipboard, strips any spec header, prepends the canonical AI mutation rules, and copies the merged payload back to clipboard; copies `no copied IR` if clipboard does not contain valid IR
 
 ### Blockify
 
@@ -52,6 +53,9 @@ Implemented:
 
 - parse and validate `[procedure]` roots
 - parse and validate `[script]` roots
+- parse and validate bare `[stack:]` and `[opcode:]` roots (wrapped into synthetic `[script]` internally)
+- `OPERAND1`/`OPERAND2` → `NUM1`/`NUM2` normalization for arithmetic operators in both the visual renderer and the scratch-blocks XML path
+- string literals render as orange variable-style reporter blocks in the visual renderer
 - visual render fallback renderer
 - embedded `scratch-blocks` renderer path
 - clipboard preview window
@@ -61,7 +65,8 @@ Implemented:
   - `Patched IR Result`
   - visual preview
 - button row pinned at the bottom of the editor
-- **`copy rules with exported IR`** command block: reads Textify's last export from shared state, prepends the canonical AI mutation rules header, and copies the merged payload to clipboard; copies `no copied IR` if no valid IR has been exported yet
+- **`clipboard contents`** reporter block: reads the clipboard and returns its text, displayed in a value bubble when clicked
+- parser tolerates leading `# comment` lines (e.g. the spec header emitted by Textify)
 
 Embedded build artifact:
 
@@ -95,7 +100,11 @@ These record nontrivial LLM mutation tasks that go beyond simple scalar edits, i
 - empty substacks
 - promotion/demotion of commands across stack levels
 
-A structured test ledger with 8 tests across two base IRs is available in `AI_MODEL_TEST_LEDGER.md` and `ai-model-test-ledger.html`.
+A structured test ledger with 8 tests across two base IRs is available in `AI_MODEL_TEST_LEDGER.md` and `ai-model-test-ledger.html` (V1 — inline rules). A behavioral variant is in `ai-model-test-ledger-v2.html` (V2). A post-rule-update ledger using the same direct-mutation tests as V1 but with URL-based rules is in `ai-model-test-ledger-v3.html` (V3).
+
+**AI mutation rules update (2026-03-25):** `AI_MUTATION_RULES` was changed from an inline bullet-point list to a prompt instructing the model to fetch and follow `IR_GRAMMAR.md` from GitHub before responding. V1 and V2 ledger results used the old inline rules. V3 results use the new URL-based rules. Do not compare results across ledger versions.
+
+**Pipeline update (2026-03-25):** `AI_MUTATION_RULES` and the `copy rules with clipboard IR` block moved from Blockify to Textify. `IR_GRAMMAR.md` was replaced with a machine-optimized formal grammar spec; the previous content moved to `IR_FULL_REFERENCE.md`. Textify clipboard exports now include a `# Textify Canon IR — spec:` header line. Blockify parser now tolerates and strips those header lines. Blockify now accepts bare `[stack:]` and `[opcode:]` roots.
 
 Google Gemini (current) round 2 (2026-03-24): **8/8 pass** across parse, validate, and structural correctness using the embedded renderer. Session context bleed observed on tests 4 and 5 — resolved by re-anchoring to the starting IR before each mutation request.
 
@@ -152,8 +161,8 @@ These return structured results:
 
 Current Jest status at this checkpoint:
 
-- `18` test suites passing
-- `116` tests passing
+- `15` test suites passing
+- `89` tests passing
 
 Coverage currently includes:
 
@@ -165,7 +174,8 @@ Coverage currently includes:
 - patch workflow state behavior
 - editor layout behavior
 - Textify/Blockify shared state bridge (`__TEXTIFY_SHARED__`)
-- `copyRulesWithExportedIR` block behavior (all cases)
+- `copyRulesWithClipboardIR` block behavior (all cases, now in Textify)
+- `readClipboard` reporter block behavior
 
 ## Next Likely Steps
 

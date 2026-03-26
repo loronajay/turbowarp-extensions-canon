@@ -1,366 +1,357 @@
-# Textify Canon IR — Grammar and AI Mutation Rules
+# Textify Canon IR — Grammar Specification
 
-This document is the canonical public reference for the Textify IR format and the rules AI models must follow when working with it.
+**Version:** 1
+**Canonical URL:** `https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_GRAMMAR.md`
 
-It is intended to be linked directly from any AI session where a user pastes Textify IR for mutation. Models with web access can fetch this document at:
-
-```
-https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_GRAMMAR.md
-```
+Textify Canon IR is a bracket-delimited text format representing Scratch/TurboWarp block programs. This document is the complete formal specification. Follow it exactly when reading or producing IR.
 
 ---
 
-## AI Mutation Rules
+## Root
 
-These rules apply to every mutation task. Follow them exactly.
+A document is exactly one root node.
 
-- Start from the IR provided by the user. Repeat it back exactly before applying any mutation.
-- Preserve all unrelated structure.
-- Preserve opcode `id` values unless new nodes are required (new nodes require new unique ids).
-- Keep `fields`, `inputs`, and `stacks` distinct — they are not interchangeable.
-- Do not invent unsupported structure.
-- Copy opcode names exactly as they appear in the IR. Do not abbreviate or misspell them.
-  - Example of a known failure: `look_say` — the correct opcode is `looks_say`.
-- String literal values must be enclosed in double quotes: `[literal:string:"hello"]` not `[literal:string:hello]`.
-- Number and boolean literal values are never quoted: `[literal:number:10]` `[literal:boolean:true]`.
-- Return only valid Textify canon IR.
-- Do not include explanation outside the IR.
+```
+root := procedure | script | stack | opcode
+```
+
+`[stack:]` and `[opcode:...]` roots are accepted by Blockify and wrapped into a synthetic `[script]` before rendering.
 
 ---
 
-## IR Grammar
+## Node Types
 
-### Root Types
-
-Every IR document has exactly one root node. The root must be either `[procedure]` or `[script]`.
-
-#### `[procedure]`
-
-Represents a custom block definition.
+### procedure
 
 ```
 [procedure
-  proccode:"MY BLOCK %s %n"
-  argumentnames:["label","count"]
-  argumentdefaults:["hello","0"]
-  warp:false
-  body:[stack:
-    ...
-  ]
+  proccode:"STRING"
+  argumentnames:STRING-ARRAY
+  argumentdefaults:STRING-ARRAY
+  warp:BOOL
+  body:[stack: OPCODE* ]
 ]
 ```
 
-| Field | Type | Required | Notes |
-|---|---|---|---|
-| `proccode` | string | yes | Exact proccode including `%s`, `%n`, `%b` tokens |
-| `argumentnames` | string array | yes | One entry per argument slot |
-| `argumentdefaults` | string array | yes | One entry per argument slot |
-| `warp` | boolean | no | Defaults to `false` if omitted |
-| `body` | stack node | yes | The block body |
-
-#### `[script]`
-
-Represents a top-level stack (e.g. a when-flag-clicked script).
-
-```
-[script
-  body:[stack:
-    ...
-  ]
-]
-```
-
-| Field | Type | Required |
+| Key | Type | Required |
 |---|---|---|
+| `proccode` | string | yes |
+| `argumentnames` | string array | yes |
+| `argumentdefaults` | string array | yes |
+| `warp` | bool | no — defaults to `false` |
 | `body` | stack node | yes |
+
+`proccode` encodes argument slots as `%s` (string/number) or `%b` (boolean). The length of `argumentnames` and `argumentdefaults` must match the number of `%s`/`%b` tokens in `proccode`.
 
 ---
 
-### Node Types
+### script
 
-#### `[stack:]`
+```
+[script
+  body:[stack: OPCODE* ]
+]
+```
 
-An ordered list of opcode nodes. Represents execution order — first child executes first.
+---
+
+### stack
 
 ```
 [stack:
-  [opcode:motion_movesteps ...]
-  [opcode:motion_movesteps ...]
+  [opcode:...] ...
 ]
 ```
 
-An empty stack is valid:
+A stack is an ordered sequence of opcode nodes. Empty stack: `[stack:]`
+
+---
+
+### opcode
 
 ```
-[stack:]
-```
-
-#### `[opcode:OPCODE_NAME]`
-
-Represents a single Scratch block.
-
-```
-[opcode:data_changevariableby
-  id:"some-unique-id"
-  fields:{VARIABLE:"score"}
-  inputs:{VALUE:[literal:number:1]}
-  stacks:{}
+[opcode:OPCODE_NAME
+  id:"STRING"
+  fields:{KEY:"VALUE" ...}
+  inputs:{KEY:NODE ...}
+  stacks:{KEY:[stack:...] ...}
 ]
 ```
 
-| Property | Type | Required | Notes |
+| Key | Type | Required | Notes |
 |---|---|---|---|
 | `id` | string | yes | Must be unique within the root |
 | `fields` | field map | yes | Use `{}` if empty |
 | `inputs` | input map | yes | Use `{}` if empty |
-| `stacks` | stack map | yes | Use `{}` if empty — or omit substacks for non-control blocks |
+| `stacks` | stack map | yes | Use `{}` if empty |
 
-**Fields** hold scalar values like variable names, field dropdown values:
-
-```
-fields:{VARIABLE:"score"}
-fields:{EFFECT:"COLOR"}
-fields:{}
-```
-
-**Inputs** hold value nodes (literals, reporters, operator blocks):
-
-```
-inputs:{VALUE:[literal:number:10]}
-inputs:{CONDITION:[opcode:operator_equals ...]}
-inputs:{}
-```
-
-**Stacks** hold substack slots (control block mouths):
-
-```
-stacks:{SUBSTACK:[stack:
-  [opcode:data_changevariableby ...]
-]}
-stacks:{SUBSTACK:[stack:] SUBSTACK2:[stack:]}
-stacks:{}
-```
-
-#### Control block stack slots
-
-These opcodes automatically initialize missing substack slots to empty stacks. You must still include them explicitly when writing IR:
-
-| Opcode | Stack slots |
-|---|---|
-| `control_if` | `SUBSTACK` |
-| `control_if_else` | `SUBSTACK`, `SUBSTACK2` |
-| `control_repeat` | `SUBSTACK` |
-| `control_repeat_until` | `SUBSTACK` |
-| `control_forever` | `SUBSTACK` |
-| `control_while` | `SUBSTACK` |
-
-#### `[literal:TYPE:VALUE]`
-
-Represents a literal value in an input slot.
-
-| Type | Format | Example |
-|---|---|---|
-| number | unquoted | `[literal:number:10]` |
-| string | double-quoted | `[literal:string:"hello"]` |
-| boolean | unquoted | `[literal:boolean:true]` |
-
-**String literals must always be quoted.** This is the most common model failure mode.
-
-#### `[menu:OPCODE:"VALUE"]`
-
-Represents a dropdown menu input.
-
-```
-[menu:looks_costume:"costume1"]
-[menu:motion_goto_menu:"_mouse_"]
-```
+- **fields** hold scalar values: variable names, dropdown selections, field labels
+- **inputs** hold value nodes: `literal`, `menu`, or reporter `opcode` nodes
+- **stacks** hold substack slots for control blocks only
 
 ---
 
-### Argument Reporters
+### literal
 
-Used inside procedure bodies to reference argument values.
+```
+[literal:number:VALUE]        VALUE is unquoted — e.g. [literal:number:10]
+[literal:number:-VALUE]       Negative — e.g. [literal:number:-108]
+[literal:string:"VALUE"]      VALUE is double-quoted — e.g. [literal:string:"hello"]
+[literal:boolean:true]
+[literal:boolean:false]
+```
+
+**String values MUST be double-quoted. Number and boolean values are NEVER quoted.**
+
+---
+
+### menu
+
+```
+[menu:MENU_OPCODE:"VALUE"]
+```
+
+Example: `[menu:looks_costume:"costume1"]`
+
+---
+
+### argument_reporter
+
+Used inside `procedure` bodies to reference argument values.
 
 ```
 [opcode:argument_reporter_string_number
-  id:"arg0"
-  fields:{VALUE:"label"}
+  id:"ID"
+  fields:{VALUE:"ARG_NAME"}
   inputs:{}
   stacks:{}
 ]
 
 [opcode:argument_reporter_boolean
-  id:"arg1"
-  fields:{VALUE:"flag"}
+  id:"ID"
+  fields:{VALUE:"ARG_NAME"}
   inputs:{}
   stacks:{}
 ]
 ```
 
+`ARG_NAME` must match an entry in the enclosing procedure's `argumentnames`.
+
 ---
 
-## Common Opcode Reference
+## String Array Syntax
+
+```
+[]
+["a"]
+["a","b","c"]
+```
+
+Values are always double-quoted strings.
+
+---
+
+## Constraints
+
+- All `id` values within a root must be unique
+- `inputs` values may not be `stack` or `procedure` nodes
+- `stacks` values must be `stack` nodes
+- String literals must use double quotes — `[literal:string:"x"]` not `[literal:string:x]`
+- Opcode names must be exact — `looks_say` not `look_say`
+- `fields`, `inputs`, and `stacks` are distinct and not interchangeable
+
+---
+
+## Opcode Input and Field Reference
 
 ### Motion
-| Opcode | Key inputs/fields |
-|---|---|
-| `motion_movesteps` | `STEPS` |
-| `motion_gotoxy` | `X`, `Y` |
-| `motion_turnright` | `DEGREES` |
-| `motion_turnleft` | `DEGREES` |
-| `motion_pointindirection` | `DIRECTION` |
-| `motion_changexby` | `DX` |
-| `motion_changeyby` | `DY` |
-| `motion_setx` | `X` |
-| `motion_sety` | `Y` |
-| `motion_xposition` | *(reporter, no inputs)* |
-| `motion_yposition` | *(reporter, no inputs)* |
-| `motion_direction` | *(reporter, no inputs)* |
+
+| Opcode | inputs | fields |
+|---|---|---|
+| `motion_movesteps` | `STEPS` | |
+| `motion_gotoxy` | `X`, `Y` | |
+| `motion_turnright` | `DEGREES` | |
+| `motion_turnleft` | `DEGREES` | |
+| `motion_pointindirection` | `DIRECTION` | |
+| `motion_changexby` | `DX` | |
+| `motion_changeyby` | `DY` | |
+| `motion_setx` | `X` | |
+| `motion_sety` | `Y` | |
+| `motion_xposition` | *(reporter, no inputs)* | |
+| `motion_yposition` | *(reporter, no inputs)* | |
+| `motion_direction` | *(reporter, no inputs)* | |
 
 ### Looks
-| Opcode | Key inputs/fields |
-|---|---|
-| `looks_say` | `MESSAGE` |
-| `looks_sayforsecs` | `MESSAGE`, `SECS` |
-| `looks_think` | `MESSAGE` |
-| `looks_thinkforsecs` | `MESSAGE`, `SECS` |
-| `looks_show` | *(no inputs)* |
-| `looks_hide` | *(no inputs)* |
-| `looks_setsizeto` | `SIZE` |
-| `looks_changesizeby` | `CHANGE` |
-| `looks_switchcostumeto` | `COSTUME` (menu) |
-| `looks_nextcostume` | *(no inputs)* |
-| `looks_size` | *(reporter)* |
+
+| Opcode | inputs | fields |
+|---|---|---|
+| `looks_say` | `MESSAGE` | |
+| `looks_sayforsecs` | `MESSAGE`, `SECS` | |
+| `looks_think` | `MESSAGE` | |
+| `looks_thinkforsecs` | `MESSAGE`, `SECS` | |
+| `looks_show` | *(none)* | |
+| `looks_hide` | *(none)* | |
+| `looks_setsizeto` | `SIZE` | |
+| `looks_changesizeby` | `CHANGE` | |
+| `looks_switchcostumeto` | `COSTUME` (menu) | |
+| `looks_nextcostume` | *(none)* | |
+| `looks_size` | *(reporter)* | |
+
+### Sound
+
+| Opcode | inputs | fields |
+|---|---|---|
+| `sound_play` | `SOUND_MENU` (menu) | |
+| `sound_playuntildone` | `SOUND_MENU` (menu) | |
+| `sound_stopallsounds` | *(none)* | |
+| `sound_setvolumeto` | `VOLUME` | |
+| `sound_changevolumeby` | `VOLUME` | |
 
 ### Control
-| Opcode | Key inputs | Stack slots |
+
+| Opcode | inputs | stacks | fields |
+|---|---|---|---|
+| `control_if` | `CONDITION` | `SUBSTACK` | |
+| `control_if_else` | `CONDITION` | `SUBSTACK`, `SUBSTACK2` | |
+| `control_repeat` | `TIMES` | `SUBSTACK` | |
+| `control_forever` | *(none)* | `SUBSTACK` | |
+| `control_repeat_until` | `CONDITION` | `SUBSTACK` | |
+| `control_while` | `CONDITION` | `SUBSTACK` | |
+| `control_wait` | `DURATION` | | |
+| `control_wait_until` | `CONDITION` | | |
+| `control_stop` | *(none)* | | `STOP_OPTION` |
+| `control_delete_this_clone` | *(none)* | | |
+| `control_start_as_clone` | *(hat)* | | |
+
+### Events
+
+| Opcode | inputs | fields |
 |---|---|---|
-| `control_if` | `CONDITION` | `SUBSTACK` |
-| `control_if_else` | `CONDITION` | `SUBSTACK`, `SUBSTACK2` |
-| `control_repeat` | `TIMES` | `SUBSTACK` |
-| `control_forever` | *(none)* | `SUBSTACK` |
-| `control_repeat_until` | `CONDITION` | `SUBSTACK` |
-| `control_wait` | `DURATION` | *(none)* |
-| `control_stop` | field `STOP_OPTION` | *(none)* |
+| `events_whenflagclicked` | *(hat, none)* | |
+| `events_whenkeypressed` | *(hat)* | `KEY_OPTION` |
+| `events_whenthisspriteclicked` | *(hat, none)* | |
+| `events_broadcast` | `BROADCAST_INPUT` | |
+| `events_broadcastandwait` | `BROADCAST_INPUT` | |
+
+### Sensing
+
+| Opcode | inputs | fields |
+|---|---|---|
+| `sensing_touchingobject` | `TOUCHINGOBJECTMENU` (menu) | |
+| `sensing_keypressed` | `KEY_OPTION` (menu) | |
+| `sensing_mousedown` | *(reporter-boolean)* | |
+| `sensing_mousex` | *(reporter)* | |
+| `sensing_mousey` | *(reporter)* | |
+| `sensing_answer` | *(reporter)* | |
+| `sensing_timer` | *(reporter)* | |
+| `sensing_resettimer` | *(none)* | |
 
 ### Operators
-| Opcode | Inputs |
+
+**Critical:** arithmetic operators use `NUM1`/`NUM2`, not `OPERAND1`/`OPERAND2`.
+
+| Opcode | inputs |
 |---|---|
+| `operator_add` | `NUM1`, `NUM2` |
+| `operator_subtract` | `NUM1`, `NUM2` |
+| `operator_multiply` | `NUM1`, `NUM2` |
+| `operator_divide` | `NUM1`, `NUM2` |
+| `operator_mod` | `NUM1`, `NUM2` |
+| `operator_random` | `FROM`, `TO` |
+| `operator_round` | `NUM` |
+| `operator_mathop` | `NUM` — field `OPERATOR` |
 | `operator_equals` | `OPERAND1`, `OPERAND2` |
 | `operator_gt` | `OPERAND1`, `OPERAND2` |
 | `operator_lt` | `OPERAND1`, `OPERAND2` |
 | `operator_and` | `OPERAND1`, `OPERAND2` |
 | `operator_or` | `OPERAND1`, `OPERAND2` |
 | `operator_not` | `OPERAND` |
-| `operator_add` | `NUM1`, `NUM2` |
-| `operator_subtract` | `NUM1`, `NUM2` |
-| `operator_multiply` | `NUM1`, `NUM2` |
-| `operator_divide` | `NUM1`, `NUM2` |
-| `operator_mod` | `NUM1`, `NUM2` |
-| `operator_round` | `NUM` |
 | `operator_join` | `STRING1`, `STRING2` |
+| `operator_letter_of` | `LETTER`, `STRING` |
 | `operator_length` | `STRING` |
+| `operator_contains` | `STRING1`, `STRING2` |
 
-### Data (Variables)
-| Opcode | Fields | Inputs |
+### Data (Variables and Lists)
+
+| Opcode | inputs | fields |
 |---|---|---|
-| `data_setvariableto` | `VARIABLE` | `VALUE` |
-| `data_changevariableby` | `VARIABLE` | `VALUE` |
-| `data_showvariable` | `VARIABLE` | *(none)* |
-| `data_hidevariable` | `VARIABLE` | *(none)* |
-| `data_variable` | `VARIABLE` | *(reporter)* |
-
-### Events
-| Opcode | Notes |
-|---|---|
-| `events_whenflagclicked` | hat block, no inputs |
-| `events_whenkeypressed` | field `KEY_OPTION` |
-| `events_whenthisspriteclicked` | no inputs |
-| `events_broadcast` | input `BROADCAST_INPUT` |
-| `events_broadcastandwait` | input `BROADCAST_INPUT` |
-
-### Sensing
-| Opcode | Key inputs |
-|---|---|
-| `sensing_touchingobject` | `TOUCHINGOBJECTMENU` (menu) |
-| `sensing_keypressed` | `KEY_OPTION` (menu) |
-| `sensing_mousedown` | *(reporter-boolean)* |
-| `sensing_mousex` | *(reporter)* |
-| `sensing_mousey` | *(reporter)* |
-| `sensing_answer` | *(reporter)* |
-| `sensing_timer` | *(reporter)* |
-| `sensing_resettimer` | *(no inputs)* |
-
----
-
-## Known Model Failure Modes
-
-These failure modes have been observed across multiple models and are worth checking before accepting output as valid.
-
-**String literal quoting** — the most common failure. Models produce `[literal:string:hello]` instead of `[literal:string:"hello"]`. This causes a parse error. Always check that string literal values are enclosed in double quotes.
-
-**Opcode misspelling** — models occasionally abbreviate or misspell opcodes (e.g. `look_say` instead of `looks_say`). The IR will parse and validate but the block will render in fallback mode. Verify opcode names exactly.
-
-**Session context bleed** — when running multiple mutations in the same session, models can carry structure from an earlier mutation into a later one. To prevent this, re-state the starting IR explicitly before each new mutation request using a continuation prompt: `start from here, don't change anything: (IR)`.
-
-**Threshold drift on behavioral prompts** — when asked to change a comparison direction (e.g. "pass when the sprite goes past the target"), models may adjust the comparison value as well as the operator. If the literal value should not change, state it explicitly: "adjust the comparison direction only — keep the threshold value the same."
-
-**Unintended structural changes** — models may add or remove blocks not mentioned in the mutation request. The mutation rules require preserving all unrelated structure, but this should be verified in Blockify after applying any AI-produced IR.
+| `data_setvariableto` | `VALUE` | `VARIABLE` |
+| `data_changevariableby` | `VALUE` | `VARIABLE` |
+| `data_showvariable` | *(none)* | `VARIABLE` |
+| `data_hidevariable` | *(none)* | `VARIABLE` |
+| `data_variable` | *(reporter)* | `VARIABLE` |
+| `data_addtolist` | `ITEM` | `LIST` |
+| `data_deleteoflist` | `INDEX` | `LIST` |
+| `data_deletealloflist` | *(none)* | `LIST` |
+| `data_insertatlist` | `ITEM`, `INDEX` | `LIST` |
+| `data_replaceitemoflist` | `ITEM`, `INDEX` | `LIST` |
+| `data_itemoflist` | `INDEX` | `LIST` |
+| `data_itemnumoflist` | `ITEM` | `LIST` |
+| `data_lengthoflist` | *(reporter)* | `LIST` |
+| `data_listcontainsitem` | `ITEM` | `LIST` |
+| `data_showlist` | *(none)* | `LIST` |
+| `data_hidelist` | *(none)* | `LIST` |
 
 ---
 
 ## Complete Example
 
-A procedure with a conditional repeat, an if/else inside, and a second top-level if:
-
 ```
 [procedure
-  proccode:"ANNOUNCE SCORE %s"
-  argumentnames:["label"]
-  argumentdefaults:["score"]
-  warp:false
+  proccode:"Move To Grid %n %n"
+  argumentnames:["col","row"]
+  argumentdefaults:["0","0"]
+  warp:true
   body:[stack:
-    [opcode:control_if
-      id:"outer_if"
+    [opcode:motion_gotoxy
+      id:"goto1"
       fields:{}
       inputs:{
-        CONDITION:[opcode:operator_gt
-          id:"gt1"
+        X:[opcode:operator_add
+          id:"calc_x"
           fields:{}
           inputs:{
-            OPERAND1:[opcode:data_variable
-              id:"var_score"
-              fields:{VARIABLE:"score"}
-              inputs:{}
+            NUM1:[literal:number:-108]
+            NUM2:[opcode:operator_multiply
+              id:"scale_x"
+              fields:{}
+              inputs:{
+                NUM1:[opcode:argument_reporter_string_number
+                  id:"arg_col"
+                  fields:{VALUE:"col"}
+                  inputs:{}
+                  stacks:{}
+                ]
+                NUM2:[literal:number:24]
+              }
               stacks:{}
             ]
-            OPERAND2:[literal:number:0]
+          }
+          stacks:{}
+        ]
+        Y:[opcode:operator_add
+          id:"calc_y"
+          fields:{}
+          inputs:{
+            NUM1:[literal:number:-108]
+            NUM2:[opcode:operator_multiply
+              id:"scale_y"
+              fields:{}
+              inputs:{
+                NUM1:[opcode:argument_reporter_string_number
+                  id:"arg_row"
+                  fields:{VALUE:"row"}
+                  inputs:{}
+                  stacks:{}
+                ]
+                NUM2:[literal:number:24]
+              }
+              stacks:{}
+            ]
           }
           stacks:{}
         ]
       }
-      stacks:{
-        SUBSTACK:[stack:
-          [opcode:looks_say
-            id:"say1"
-            fields:{}
-            inputs:{
-              MESSAGE:[opcode:argument_reporter_string_number
-                id:"arg_label"
-                fields:{VALUE:"label"}
-                inputs:{}
-                stacks:{}
-              ]
-            }
-            stacks:{}
-          ]
-        ]
-      }
-    ]
-    [opcode:data_setvariableto
-      id:"reset1"
-      fields:{VARIABLE:"score"}
-      inputs:{VALUE:[literal:number:0]}
       stacks:{}
     ]
   ]

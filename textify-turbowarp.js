@@ -10,6 +10,31 @@
   let lastExportText = '';
   globalThis.__TEXTIFY_SHARED__ = { lastExportText: '' };
 
+  const IR_SPEC_HEADER = '# Textify Canon IR — spec: https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_GRAMMAR.md';
+
+  const AI_MUTATION_RULES = `You are modifying Textify canon IR.
+
+Before responding, fetch and read the full grammar specification at:
+https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_GRAMMAR.md
+
+Follow all rules and grammar defined in that document exactly.
+
+When you receive the IR below, do not make any modifications yet. First, repeat the IR back exactly as provided, then wait for a modification request.
+
+IR:
+`;
+
+  async function readClipboardText() {
+    try {
+      if (navigator?.clipboard?.readText) {
+        return String(await navigator.clipboard.readText() || '');
+      }
+    } catch {
+      return '';
+    }
+    return '';
+  }
+
   const EXPLICIT_MENU_OPCODES = new Set([
     'looks_backdrops',
     'looks_costume'
@@ -626,7 +651,7 @@
     globalThis.__TEXTIFY_SHARED__.lastExportText = lastExportText;
 
     if (options.copy) {
-      await copyTextToClipboard(result);
+      await copyTextToClipboard(`${IR_SPEC_HEADER}\n${result}`);
     }
 
     if (options.popup) {
@@ -642,7 +667,7 @@
     globalThis.__TEXTIFY_SHARED__.lastExportText = lastExportText;
 
     if (options.copy) {
-      await copyTextToClipboard(result);
+      await copyTextToClipboard(`${IR_SPEC_HEADER}\n${result}`);
     }
 
     if (options.popup) {
@@ -755,6 +780,11 @@
             opcode: 'getExportedIR',
             blockType: Scratch.BlockType.REPORTER,
             text: 'exported IR'
+          },
+          {
+            opcode: 'copyRulesWithClipboardIR',
+            blockType: Scratch.BlockType.COMMAND,
+            text: 'copy rules with clipboard IR'
           }
         ]
       };
@@ -834,6 +864,17 @@
       }
 
       await exportAndPresent(target, args.PROCNAME, { copy: true, popup: false });
+    }
+
+    async copyRulesWithClipboardIR() {
+      const raw = (await readClipboardText()).trim();
+      const ir = raw.replace(/^#[^\n]*\n?/gm, '').trim();
+      if (!ir.startsWith('[procedure') && !ir.startsWith('[script') &&
+          !ir.startsWith('[stack') && !ir.startsWith('[opcode')) {
+        await copyTextToClipboard('no copied IR');
+        return;
+      }
+      await copyTextToClipboard(`${AI_MUTATION_RULES}${ir}`);
     }
   }
 
