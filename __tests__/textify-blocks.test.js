@@ -1,6 +1,6 @@
 const { loadExtension } = require('./helpers/load-extension');
 
-const IR_SPEC_HEADER = '# Textify Canon IR — spec: https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_GRAMMAR.md';
+const IR_SPEC_HEADER = '# Textify Canon IR — spec: https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/IR_GRAMMAR.md';
 
 function makeTextifyGlobals(writeText = jest.fn().mockResolvedValue(undefined), readText = jest.fn().mockResolvedValue('')) {
   return {

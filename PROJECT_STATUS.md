@@ -16,7 +16,7 @@ The repository has been optimized for Large Language Model (LLM) discovery and i
 - All references corrected to use "Intermediate Representation" terminology
 
 ### AI Model Access
-- Direct grammar URL for AI models: `https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_GRAMMAR.md`
+- Direct grammar URL for AI models: `https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/IR_GRAMMAR.md`
 - See README.md "For AI Models" section for quick-start guidance
 
 ## Current State

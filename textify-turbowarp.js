@@ -10,12 +10,12 @@
   let lastExportText = '';
   globalThis.__TEXTIFY_SHARED__ = { lastExportText: '' };
 
-  const IR_SPEC_HEADER = '# Textify Canon IR — spec: https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_GRAMMAR.md';
+  const IR_SPEC_HEADER = '# Textify Canon IR — spec: https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/IR_GRAMMAR.md';
 
   const AI_MUTATION_RULES = `You are modifying Textify canon IR.
 
 Before responding, fetch and read the full grammar specification at:
-https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_GRAMMAR.md
+https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/IR_GRAMMAR.md
 
 Follow all rules and grammar defined in that document exactly.
 

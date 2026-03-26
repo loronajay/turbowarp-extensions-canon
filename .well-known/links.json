@@ -1,27 +1,27 @@
 {
   "project_metadata": {
-    "repository": "https://github.com/loronajay/turbowarp-extensions-canon",
+    "repository": "https://github.com/loronajay/textify-blockify-IR",
     "project_owner": "loronajay",
     "canonical_source": true
   },
   "core_specifications": {
     "grammar_spec": {
-      "url": "https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_GRAMMAR.md",
-      "raw_url": "https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_GRAMMAR.md",
+      "url": "https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/IR_GRAMMAR.md",
+      "raw_url": "https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/IR_GRAMMAR.md",
       "format": "markdown",
       "purpose": "Formal grammar specification for Textify Canon IR",
       "audience": "AI models (fetch before processing any IR)"
     },
     "model_primer": {
-      "url": "https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/MODEL_PRIMER.md",
-      "raw_url": "https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/MODEL_PRIMER.md",
+      "url": "https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/MODEL_PRIMER.md",
+      "raw_url": "https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/MODEL_PRIMER.md",
       "format": "markdown",
       "purpose": "Quick-start and critical rules for LLMs",
       "audience": "AI models and LLM engineers"
     },
     "full_reference": {
-      "url": "https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_FULL_REFERENCE.md",
-      "raw_url": "https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_FULL_REFERENCE.md",
+      "url": "https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/IR_FULL_REFERENCE.md",
+      "raw_url": "https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/IR_FULL_REFERENCE.md",
       "format": "markdown",
       "purpose": "Human-readable reference with mutation rules and failure modes",
       "audience": "Developers and AI model handlers"
@@ -29,39 +29,39 @@
   },
   "discovery_files": {
     "general_llm": {
-      "url": "https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/llms.txt",
+      "url": "https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/llms.txt",
       "format": "text",
       "purpose": "General LLM platform discovery"
     },
     "claude_specific": {
-      "url": "https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/claude.txt",
+      "url": "https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/claude.txt",
       "format": "text",
       "purpose": "Claude-specific discovery and instructions"
     }
   },
   "documentation": {
     "readme": {
-      "url": "https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/README.md",
+      "url": "https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/README.md",
       "purpose": "Project overview and AI model quick-start"
     },
     "project_status": {
-      "url": "https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/PROJECT_STATUS.md",
+      "url": "https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/PROJECT_STATUS.md",
       "purpose": "Implementation status, known limits, testing history"
     },
     "usage": {
-      "url": "https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/USAGE.md",
+      "url": "https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/USAGE.md",
       "purpose": "User workflow and block descriptions"
     }
   },
   "ai_mutation_testing": {
-    "benchmark_samples": "https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/ai_model_testing/AI_MUTATION_BENCHMARKS.md",
-    "google_gemini_history": "https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/ai_model_testing/GOOGLE_AI_ROUNDTRIP_HISTORY.md",
-    "chatgpt_history": "https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/ai_model_testing/CHATGPT_ROUNDTRIP_HISTORY.md",
-    "claude_history": "https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/ai_model_testing/CLAUDE_ROUNDTRIP_HISTORY.md"
+    "benchmark_samples": "https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/ai_model_testing/AI_MUTATION_BENCHMARKS.md",
+    "google_gemini_history": "https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/ai_model_testing/GOOGLE_AI_ROUNDTRIP_HISTORY.md",
+    "chatgpt_history": "https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/ai_model_testing/CHATGPT_ROUNDTRIP_HISTORY.md",
+    "claude_history": "https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/ai_model_testing/CLAUDE_ROUNDTRIP_HISTORY.md"
   },
   "source_code": {
-    "textify": "https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/textify-turbowarp.js",
-    "blockify": "https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/blockify-turbowarp.js",
-    "blockify_embedded": "https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/dist/blockify-turbowarp.embedded.js"
+    "textify": "https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/textify-turbowarp.js",
+    "blockify": "https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/blockify-turbowarp.js",
+    "blockify_embedded": "https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/dist/blockify-turbowarp.embedded.js"
   }
 }

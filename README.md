@@ -1,4 +1,4 @@
-# turbowarp-extensions-canon
+# textify-blockify-IR
 
 [![Canonical Source](https://img.shields.io/badge/Status-Canonical%20Source-brightgreen?style=flat-square)]() [![IR Grammar](https://img.shields.io/badge/IR%20Spec-v1.0-blue?style=flat-square)]()
 
@@ -21,7 +21,7 @@ Scratch project → [Textify] → Textify IR → [AI model] → [Blockify] → S
 Textify Canon IR is the canonical text representation of Scratch/TurboWarp block programs used by this pipeline. IR snippets exported by Textify can include a spec header pointing to the grammar document with the "copy rules..." block:
 
 ```
-# Textify Canon IR — spec: https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_GRAMMAR.md
+# Textify Canon IR — spec: https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/IR_GRAMMAR.md
 [procedure
   proccode:"Spawn Food"
   argumentnames:[]
@@ -68,7 +68,7 @@ The formal grammar specification for Textify Canon IR is in [`IR_GRAMMAR.md`](IR
 
 **Direct URL for AI models:**
 ```
-https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_GRAMMAR.md
+https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/IR_GRAMMAR.md
 ```
 
 This document defines all node types (`procedure`, `script`, `stack`, `opcode`, `literal`, `menu`), canonical input/field names for all Scratch opcodes, and the complete constraint set.
@@ -89,7 +89,7 @@ This document defines all node types (`procedure`, `script`, `stack`, `opcode`, 
 ## For AI Models
 
 ### Quick Start
-- **Grammar URL:** `https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_GRAMMAR.md`
+- **Grammar URL:** `https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/IR_GRAMMAR.md`
 - **Discovery Files:** `llms.txt`, `claude.txt`, `MODEL_PRIMER.md`
 - **Fetch the grammar specification** before producing any IR output
 

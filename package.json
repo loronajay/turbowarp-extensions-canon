@@ -1,5 +1,5 @@
 {
-  "name": "turbowarp-extensions-canon",
+  "name": "textify-blockify-IR",
   "version": "1.0.0",
   "description": "A deterministic IR transformation engine for Scratch/TurboWarp block-based programs. Enables AI-assisted code mutation via Textify Canon IR.",
   "private": true,
@@ -7,9 +7,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/loronajay/turbowarp-extensions-canon.git"
+    "url": "https://github.com/loronajay/textify-blockify-IR.git"
   },
-  "homepage": "https://github.com/loronajay/turbowarp-extensions-canon",
+  "homepage": "https://github.com/loronajay/textify-blockify-IR",
   "scripts": {
     "test": "jest",
     "build:blockify": "node scripts/build-blockify-embedded.mjs"

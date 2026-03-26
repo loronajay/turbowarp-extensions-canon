@@ -1,6 +1,6 @@
 # Textify Canon IR — AI Model Primer
 
-**Quick Start for LLMs:** Fetch and follow [IR_GRAMMAR.md](https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_GRAMMAR.md) before responding to any IR-related task.
+**Quick Start for LLMs:** Fetch and follow [IR_GRAMMAR.md](https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/IR_GRAMMAR.md) before responding to any IR-related task.
 
 ## What This Format Is
 
@@ -34,7 +34,7 @@ Textify Canon IR is a **machine-optimized bracket-delimited text format** for re
 1. **ALWAYS fetch the grammar first**
    - Your knowledge may be stale
    - The grammar is the source of truth
-   - URL: https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_GRAMMAR.md
+   - URL: https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/IR_GRAMMAR.md
 
 2. **String literals MUST use double quotes**
    ```
@@ -162,6 +162,6 @@ Before returning IR:
 ## Support & Questions
 
 For issues or clarifications:
-- Grammar spec: https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_GRAMMAR.md
-- Full reference: https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_FULL_REFERENCE.md
+- Grammar spec: https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/IR_GRAMMAR.md
+- Full reference: https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/IR_FULL_REFERENCE.md
 - Examples: See PROJECT_STATUS.md for AI roundtrip testing

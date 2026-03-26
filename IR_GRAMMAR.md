@@ -1,7 +1,7 @@
 # Textify Canon IR — Grammar Specification
 
 **Version:** 1
-**Canonical URL:** `https://raw.githubusercontent.com/loronajay/turbowarp-extensions-canon/main/IR_GRAMMAR.md`
+**Canonical URL:** `https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/IR_GRAMMAR.md`
 
 Textify Canon IR is a bracket-delimited text format representing Scratch/TurboWarp block programs. This document is the complete formal specification. Follow it exactly when reading or producing IR.
 
