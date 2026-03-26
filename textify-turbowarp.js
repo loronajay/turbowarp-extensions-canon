@@ -936,6 +936,17 @@ IR:
                 defaultValue: 'Sprite1'
               }
             }
+          },
+          {
+            opcode: 'copyAllStacksPlain',
+            blockType: Scratch.BlockType.COMMAND,
+            text: 'copy all stacks from sprite [SPRITE] plain',
+            arguments: {
+              SPRITE: {
+                type: Scratch.ArgumentType.STRING,
+                defaultValue: 'Sprite1'
+              }
+            }
           }
         ]
       };
@@ -1053,6 +1064,18 @@ IR:
       lastExportText = ir;
       globalThis.__TEXTIFY_SHARED__.lastExportText = ir;
       await copyTextToClipboard(`${IR_SPEC_HEADER}\n${ir}`);
+    }
+
+    async copyAllStacksPlain(args) {
+      const target = getTargetByName(args.SPRITE);
+      if (!target) {
+        lastExportText = `Sprite not found: ${args.SPRITE}`;
+        return;
+      }
+      const ir = exportAllStacksText(target);
+      lastExportText = ir;
+      globalThis.__TEXTIFY_SHARED__.lastExportText = ir;
+      await copyTextToClipboard(ir);
     }
 
     async copyRulesWithClipboardIR() {
