@@ -6,7 +6,7 @@ This file is the strict test ledger for evaluating AI model performance on Texti
 
 Each test contains:
 
-- a self-contained starting IR (copy this verbatim into the AI prompt via `copy rules with exported IR`)
+- a self-contained starting IR (copy this verbatim into the AI prompt via `merge rules with clipboard IR`)
 - an exact mutation request
 - a result log section per model run, with required fields
 
@@ -18,7 +18,7 @@ Unlike `AI_MUTATION_BENCHMARKS.md` (abstract cases) and `GOOGLE_AI_ROUNDTRIP_HIS
 
 1. In TurboWarp, load both `textify-turbowarp.js` and `dist/blockify-turbowarp.embedded.js`.
 2. Set a Textify export buffer to the test's Starting IR using `set Blockify IR buffer [IR]` or paste directly into the Blockify editor's Source IR field.
-3. Prepend the mutation rules header manually (or use `copy rules with exported IR` after setting the buffer) and paste to your model.
+3. Prepend the mutation rules header manually (or use `merge rules with clipboard IR` after setting the buffer) and paste to your model.
 4. Paste the model's returned IR into the Blockify editor's Source IR field.
 5. Record the Validation result from the `validate Blockify IR buffer` block.
 6. Screenshot the rendered block from the Blockify visual preview.

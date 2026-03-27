@@ -23174,6 +23174,7 @@ def ${E4.FUNCTION_NAME_PLACEHOLDER_}(text):
       event_broadcast_menu: "BROADCAST_OPTION",
       sensing_touchingobjectmenu: "TOUCHINGOBJECTMENU",
       sensing_distancetomenu: "DISTANCETOMENU",
+      sensing_of_object_menu: "OBJECT",
       sensing_keyoptions: "KEY_OPTION",
       control_create_clone_of_menu: "CLONE_OPTION"
     };
@@ -23194,6 +23195,7 @@ def ${E4.FUNCTION_NAME_PLACEHOLDER_}(text):
       sound_sounds_menu: { fieldName: "SOUND_MENU", categoryExtension: "colours_sounds" },
       sensing_touchingobjectmenu: { fieldName: "TOUCHINGOBJECTMENU", categoryExtension: "colours_sensing" },
       sensing_distancetomenu: { fieldName: "DISTANCETOMENU", categoryExtension: "colours_sensing" },
+      sensing_of_object_menu: { fieldName: "OBJECT", categoryExtension: "colours_sensing" },
       control_create_clone_of_menu: { fieldName: "CLONE_OPTION", categoryExtension: "colours_control" }
     };
     function escapeXmlText(value) {
@@ -24735,12 +24737,12 @@ ${message}</div>`;
         owner.setBufferText(sourcePane.textarea.value);
         refreshStatus();
       });
-      const copyBtn = makeBtn("Copy Buffer", async () => {
+      const copyBtn = makeBtn("Copy IR", async () => {
         try {
           await navigator.clipboard.writeText(sourcePane.textarea.value);
           copyBtn.textContent = "Copied!";
           setTimeout(() => {
-            copyBtn.textContent = "Copy Buffer";
+            copyBtn.textContent = "Copy IR";
           }, 1200);
         } catch {
           sourcePane.textarea.focus();
@@ -24750,17 +24752,17 @@ ${message}</div>`;
             document.execCommand("copy");
             copyBtn.textContent = "Copied!";
             setTimeout(() => {
-              copyBtn.textContent = "Copy Buffer";
+              copyBtn.textContent = "Copy IR";
             }, 1200);
           } catch {
             copyBtn.textContent = "Copy Failed";
             setTimeout(() => {
-              copyBtn.textContent = "Copy Buffer";
+              copyBtn.textContent = "Copy IR";
             }, 1200);
           }
         }
       });
-      const clearBtn = makeBtn("Clear Buffer", () => {
+      const clearBtn = makeBtn("Clear IR", () => {
         sourcePane.textarea.value = "";
         owner.setBufferText("");
         owner.lastError = "";
@@ -24770,12 +24772,12 @@ ${message}</div>`;
         refreshStatus();
         sourcePane.textarea.focus();
       });
-      const validateBtn = makeBtn("Validate Buffer", () => {
+      const validateBtn = makeBtn("Validate IR", () => {
         owner.setBufferText(sourcePane.textarea.value);
         owner.validateIR({ IR: owner.irBuffer });
         refreshStatus();
       });
-      const renderBtn = makeBtn("Render Buffer", () => {
+      const renderBtn = makeBtn("Render IR", () => {
         owner.setBufferText(sourcePane.textarea.value);
         owner.renderIR({ IR: owner.irBuffer });
         refreshStatus();
@@ -24825,12 +24827,12 @@ ${message}</div>`;
             {
               opcode: "loadClipboardIR",
               blockType: Scratch2.BlockType.COMMAND,
-              text: "blockify clipboard contents"
+              text: "Blockify clipboard contents"
             },
             {
               opcode: "clipboardIRMatchesBuffer",
               blockType: Scratch2.BlockType.BOOLEAN,
-              text: "clipboard IR matches buffer"
+              text: "clipboard IR matches buffer?"
             },
             {
               opcode: "readClipboard",

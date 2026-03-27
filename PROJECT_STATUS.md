@@ -29,10 +29,10 @@ This repo is a two-extension pipeline for exporting, visualising, and AI-assiste
 ## Canonical Workflow
 
 1. Use Textify's **`textify clicked block to clipboard`** block — click any block in the editor to export its whole stack as IR.
-2. Optionally use Textify's **`copy rules with clipboard IR`** block — reads IR from clipboard, prepends the canonical AI mutation rules and grammar URL, copies back.
+2. Optionally use Textify's **`merge rules with clipboard IR`** block — reads IR from clipboard, prepends the canonical AI mutation rules and grammar URL, copies back.
 3. Paste into an AI model.
 4. The model fetches `IR_GRAMMAR.md`, echoes the IR, then performs the requested mutation.
-5. Use Blockify's **`blockify clipboard contents`** block — renders the AI-returned IR visually.
+5. Use Blockify's **`Blockify clipboard contents`** block — renders the AI-returned IR visually.
 
 ## Implemented
 
@@ -48,11 +48,11 @@ File: [textify-turbowarp.js](textify-turbowarp.js)
 
 - **`copy all stacks from sprite [SPRITE] to clipboard with rules`** — exports all top-level stacks from a named sprite as `[script]` IR with spec header; procedure definitions excluded; the running script excludes itself via `util.thread.topBlock`
 
-- **`copy all stacks from sprite [SPRITE] plain`** — same as above, no spec header (for debugging); also self-excluding
+- **`copy all stacks from sprite [SPRITE] without rules`** — same as above, no spec header (for debugging); also self-excluding
 
-- **`copy rules with clipboard IR`** — reads IR from clipboard, strips any spec header, prepends canonical AI mutation rules, copies merged payload back to clipboard; copies `no copied IR` if clipboard does not contain valid IR
+- **`merge rules with clipboard IR`** — reads IR from clipboard, strips any spec header, prepends canonical AI mutation rules, copies merged payload back to clipboard; copies `no copied IR` if clipboard does not contain valid IR
 
-- **`exported IR`** reporter — returns the last IR exported in this session
+- **`clipboard IR`** reporter — returns the last IR exported in this session
 - explicit menu export support for `looks_backdrops` and `looks_costume`
 - publishes last export to `globalThis.__TEXTIFY_SHARED__` for cross-extension reads
 
@@ -69,7 +69,7 @@ File: [blockify-turbowarp.js](blockify-turbowarp.js)
 - embedded `scratch-blocks` renderer path
 - clipboard preview window with IR editor (`Source IR` pane) and visual preview
 - button row pinned at the bottom of the editor
-- **`blockify clipboard contents`** command block: loads clipboard IR and renders all block stacks in it
+- **`Blockify clipboard contents`** command block: loads clipboard IR and renders all block stacks in it
 - **`clipboard contents`** reporter block: reads the clipboard and returns its text
 - `Parser.parseAll()` — parses multiple root nodes from one IR string (enables multi-stack clipboard rendering)
 - multi-root rendering: all stacks loaded into a single scratch-blocks workspace via combined XML; stacks spread horizontally at 400px intervals to prevent overlap
@@ -98,7 +98,7 @@ A structured test ledger with 8 tests across two base IRs is available in `AI_MO
 
 **AI mutation rules update (2026-03-25):** `AI_MUTATION_RULES` was changed from an inline bullet-point list to a prompt instructing the model to fetch and follow `IR_GRAMMAR.md` from GitHub before responding. V1 and V2 ledger results used the old inline rules. V3 results use the new URL-based rules. Do not compare results across ledger versions.
 
-**Pipeline update (2026-03-25):** `AI_MUTATION_RULES` and the `copy rules with clipboard IR` block moved from Blockify to Textify. `IR_GRAMMAR.md` was replaced with a machine-optimized formal grammar spec; the previous content moved to `IR_FULL_REFERENCE.md`. Textify clipboard exports now include a `# Textify Canon IR — spec:` header line. Blockify parser now tolerates and strips those header lines. Blockify now accepts bare `[stack:]` and `[opcode:]` roots.
+**Pipeline update (2026-03-25):** `AI_MUTATION_RULES` and the `merge rules with clipboard IR` block moved from Blockify to Textify. `IR_GRAMMAR.md` was replaced with a machine-optimized formal grammar spec; the previous content moved to `IR_FULL_REFERENCE.md`. Textify clipboard exports now include a `# Textify Canon IR — spec:` header line. Blockify parser now tolerates and strips those header lines. Blockify now accepts bare `[stack:]` and `[opcode:]` roots.
 
 Google Gemini (current) round 2 (2026-03-24): **8/8 pass** across parse, validate, and structural correctness using the embedded renderer. Session context bleed observed on tests 4 and 5 — resolved by re-anchoring to the starting IR before each mutation request.
 

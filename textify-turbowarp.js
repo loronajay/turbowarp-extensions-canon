@@ -690,17 +690,17 @@ IR:
           {
             opcode: 'getExportedIR',
             blockType: Scratch.BlockType.REPORTER,
-            text: 'exported IR'
+            text: 'clipboard IR'
           },
           {
             opcode: 'copyRulesWithClipboardIR',
             blockType: Scratch.BlockType.COMMAND,
-            text: 'copy rules with clipboard IR'
+            text: 'merge rules with clipboard IR'
           },
           {
             opcode: 'textifyClickedBlock',
             blockType: Scratch.BlockType.COMMAND,
-            text: 'textify clicked block to clipboard'
+            text: 'Textify clicked block'
           },
           {
             opcode: 'copyAllStacksToClipboard',
@@ -716,7 +716,7 @@ IR:
           {
             opcode: 'copyAllStacksPlain',
             blockType: Scratch.BlockType.COMMAND,
-            text: 'copy all stacks from sprite [SPRITE] plain',
+            text: 'copy all stacks from sprite [SPRITE] without rules',
             arguments: {
               SPRITE: {
                 type: Scratch.ArgumentType.STRING,

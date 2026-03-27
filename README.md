@@ -80,8 +80,8 @@ This document defines all node types (`procedure`, `script`, `stack`, `opcode`, 
 1. In Scratch/TurboWarp, use one of Textify's export blocks:
    - **`textify clicked block to clipboard`** — click any block in the editor to export its whole stack as IR
    - **`copy all stacks from sprite [SPRITE] to clipboard with rules`** — exports every top-level stack from a sprite, with spec header
-   - **`copy all stacks from sprite [SPRITE] plain`** — same, without spec header
-2. Optionally use Textify's **`copy rules with clipboard IR`** command — reads IR from clipboard, prepends the full mutation rules and grammar URL, writes back to clipboard
+   - **`copy all stacks from sprite [SPRITE] without rules`** — same, without spec header
+2. Optionally use Textify's **`merge rules with clipboard IR`** command — reads IR from clipboard, prepends the full mutation rules and grammar URL, writes back to clipboard
 3. Paste into an AI model (Gemini, ChatGPT, Claude, etc.)
 4. The model fetches `IR_GRAMMAR.md`, echoes the IR back, then waits for your mutation request
 5. Paste the model's output back into Blockify's Source IR pane to preview and validate
