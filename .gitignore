@@ -1,4 +1,7 @@
 node_modules/
 CLAUDE.md
-.claude
+.claude/
 __tests__/
+later_stuff/
+ai_model_testing/
+scripts/
