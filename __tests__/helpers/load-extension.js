@@ -67,7 +67,11 @@ function createScratchMock(options = {}) {
 }
 
 function loadExtension(filename, options = {}) {
-  const filePath = path.resolve(__dirname, '..', '..', filename);
+  let filePath = path.resolve(__dirname, '..', '..', filename);
+  if (!fs.existsSync(filePath)) {
+    const alt = path.resolve(__dirname, '..', '..', 'factory_extensions', path.basename(filename));
+    if (fs.existsSync(alt)) filePath = alt;
+  }
   const source = fs.readFileSync(filePath, 'utf8');
   const { Scratch, runtime, registeredExtensions } = createScratchMock(options);
   const baseGlobals = options.globals || {};
