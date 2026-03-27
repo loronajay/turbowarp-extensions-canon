@@ -82,10 +82,10 @@ Embedded build artifact: [blockify-turbowarp.embedded.js](textify-and-blockify/b
 
 Canonical benchmark-style mutation samples are documented in:
 
-- [AI_MUTATION_BENCHMARKS.md](ai_model_testing/AI_MUTATION_BENCHMARKS.md)
-- [GOOGLE_AI_ROUNDTRIP_HISTORY.md](ai_model_testing/GOOGLE_AI_ROUNDTRIP_HISTORY.md)
-- [CHATGPT_ROUNDTRIP_HISTORY.md](ai_model_testing/CHATGPT_ROUNDTRIP_HISTORY.md)
-- [CLAUDE_ROUNDTRIP_HISTORY.md](ai_model_testing/CLAUDE_ROUNDTRIP_HISTORY.md)
+- `AI_MUTATION_BENCHMARKS.md`
+- `GOOGLE_AI_ROUNDTRIP_HISTORY.md`
+- `CHATGPT_ROUNDTRIP_HISTORY.md`
+- `CLAUDE_ROUNDTRIP_HISTORY.md`
 
 These record nontrivial LLM mutation tasks that go beyond simple scalar edits, including:
 
