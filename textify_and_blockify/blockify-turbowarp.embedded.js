@@ -23524,6 +23524,16 @@ def ${E4.FUNCTION_NAME_PLACEHOLDER_}(text):
         startHats: true
       };
     }
+    function getTurboWarpMediaPath() {
+      try {
+        const twScratchBlocks = typeof globalThis !== "undefined" && globalThis["ScratchBlocks"];
+        if (!twScratchBlocks || typeof twScratchBlocks.getMainWorkspace !== "function") return null;
+        const twWs = twScratchBlocks.getMainWorkspace();
+        return twWs && twWs.options && twWs.options.pathToMedia || null;
+      } catch {
+        return null;
+      }
+    }
     function renderProcedureWithScratchBlocks(root, node, scratchBlocks) {
       if (!root || !node || !scratchBlocks || typeof scratchBlocks.inject !== "function") {
         if (root && root.dataset) {
@@ -23549,6 +23559,7 @@ def ${E4.FUNCTION_NAME_PLACEHOLDER_}(text):
         }
         host.style.position = "relative";
         root.appendChild(host);
+        const twMediaPath = getTurboWarpMediaPath();
         const workspace = scratchBlocks.inject(host, {
           readOnly: true,
           theme: createScratchPreviewTheme(),
@@ -23566,7 +23577,8 @@ def ${E4.FUNCTION_NAME_PLACEHOLDER_}(text):
             drag: true,
             wheel: true,
             scrollbars: true
-          }
+          },
+          ...twMediaPath ? { media: twMediaPath } : {}
         });
         const textToDom = scratchBlocks.utils && scratchBlocks.utils.xml && typeof scratchBlocks.utils.xml.textToDom === "function" ? scratchBlocks.utils.xml.textToDom : scratchBlocks.Xml && typeof scratchBlocks.Xml.textToDom === "function" ? scratchBlocks.Xml.textToDom : null;
         if (!textToDom || !scratchBlocks.Xml || typeof scratchBlocks.Xml.domToWorkspace !== "function") {
@@ -23636,6 +23648,7 @@ def ${E4.FUNCTION_NAME_PLACEHOLDER_}(text):
           host.style.minHeight = "400px";
         }
         root.appendChild(host);
+        const twMediaPath = getTurboWarpMediaPath();
         const workspace = scratchBlocks.inject(host, {
           readOnly: true,
           theme: createScratchPreviewTheme(),
@@ -23643,7 +23656,8 @@ def ${E4.FUNCTION_NAME_PLACEHOLDER_}(text):
           scrollbars: true,
           trashcan: false,
           zoom: { controls: false, wheel: true, startScale: 0.75, maxScale: 2, minScale: 0.2 },
-          move: { drag: true, wheel: true, scrollbars: true }
+          move: { drag: true, wheel: true, scrollbars: true },
+          ...twMediaPath ? { media: twMediaPath } : {}
         });
         const textToDom = scratchBlocks.utils && scratchBlocks.utils.xml && typeof scratchBlocks.utils.xml.textToDom === "function" ? scratchBlocks.utils.xml.textToDom : scratchBlocks.Xml && typeof scratchBlocks.Xml.textToDom === "function" ? scratchBlocks.Xml.textToDom : null;
         if (!textToDom || !scratchBlocks.Xml || typeof scratchBlocks.Xml.domToWorkspace !== "function") {

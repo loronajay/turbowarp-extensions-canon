@@ -629,7 +629,7 @@ IR:
       }
 
       function cleanup() {
-        ws.removeChangeListener(onWsEvent);
+        document.removeEventListener('pointerdown', onPointerDown, true);
         document.removeEventListener('contextmenu', onRightClick, true);
         document.removeEventListener('keydown', onKeyDown, true);
         removePickerOverlay();
@@ -640,19 +640,28 @@ IR:
         reject(new Error('cancelled'));
       }
 
-      function onWsEvent(event) {
-        const SEL = (ScratchBlocks.Events && ScratchBlocks.Events.SELECTED) || 'selected';
-        const UI = (ScratchBlocks.Events && ScratchBlocks.Events.UI) || 'ui';
-
-        let blockId = null;
-        if (event.type === SEL && event.newElementId) {
-          blockId = event.newElementId;
-        } else if (event.type === UI && event.element === 'click' && event.blockId) {
-          blockId = event.blockId;
+      // Traverse up from a DOM element to find the nearest ScratchBlocks block.
+      // ScratchBlocks sets data-id = block ID on each block's SVG root element.
+      function findBlockId(el) {
+        while (el && el.tagName !== 'svg') {
+          const id = el.getAttribute && el.getAttribute('data-id');
+          if (id && ws.getBlockById(id)) return id;
+          el = el.parentElement;
         }
+        return null;
+      }
 
+      function onPointerDown(e) {
+        // Let clicks on the picker overlay through normally.
+        const overlay = document.getElementById('twgf-picker-overlay');
+        if (overlay && overlay.contains(e.target)) return;
+
+        const blockId = findBlockId(e.target);
         if (!blockId) return;
 
+        // Intercept before ScratchBlocks/TurboWarp can run the block.
+        e.stopPropagation();
+        e.preventDefault();
         cleanup();
 
         const targets = vm.runtime.targets || [];
@@ -666,6 +675,8 @@ IR:
       }
 
       function onRightClick(e) {
+        const overlay = document.getElementById('twgf-picker-overlay');
+        if (overlay && overlay.contains(e.target)) return;
         e.preventDefault();
         cancel();
       }
@@ -675,7 +686,7 @@ IR:
       }
 
       showPickerOverlay(cancel);
-      ws.addChangeListener(onWsEvent);
+      document.addEventListener('pointerdown', onPointerDown, true);
       document.addEventListener('contextmenu', onRightClick, true);
       document.addEventListener('keydown', onKeyDown, true);
     });

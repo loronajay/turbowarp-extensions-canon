@@ -1356,6 +1356,21 @@
     };
   }
 
+  // Get the Scratch blocks-media path from TurboWarp's own workspace so embedded
+  // workspaces can load the same icons (green-flag.svg, repeat.svg, etc.).
+  // Use globalThis['ScratchBlocks'] (bracket notation) so the bundler does not
+  // substitute this reference with the embedded ScratchBlocks module.
+  function getTurboWarpMediaPath() {
+    try {
+      const twScratchBlocks = typeof globalThis !== 'undefined' && globalThis['ScratchBlocks'];
+      if (!twScratchBlocks || typeof twScratchBlocks.getMainWorkspace !== 'function') return null;
+      const twWs = twScratchBlocks.getMainWorkspace();
+      return (twWs && twWs.options && twWs.options.pathToMedia) || null;
+    } catch {
+      return null;
+    }
+  }
+
   function renderProcedureWithScratchBlocks(root, node, scratchBlocks) {
     if (!root || !node || !scratchBlocks || typeof scratchBlocks.inject !== 'function') {
       if (root && root.dataset) {
@@ -1385,6 +1400,7 @@
       host.style.position = 'relative';
       root.appendChild(host);
 
+      const twMediaPath = getTurboWarpMediaPath();
       const workspace = scratchBlocks.inject(host, {
         readOnly: true,
         theme: createScratchPreviewTheme(),
@@ -1404,7 +1420,8 @@
           drag: true,
           wheel: true,
           scrollbars: true
-        }
+        },
+        ...(twMediaPath ? { media: twMediaPath } : {})
       });
 
       const textToDom =
@@ -1491,6 +1508,7 @@
       }
       root.appendChild(host);
 
+      const twMediaPath = getTurboWarpMediaPath();
       const workspace = scratchBlocks.inject(host, {
         readOnly: true,
         theme: createScratchPreviewTheme(),
@@ -1500,7 +1518,8 @@
         scrollbars: true,
         trashcan: false,
         zoom: { controls: false, wheel: true, startScale: 0.75, maxScale: 2, minScale: 0.2 },
-        move: { drag: true, wheel: true, scrollbars: true }
+        move: { drag: true, wheel: true, scrollbars: true },
+        ...(twMediaPath ? { media: twMediaPath } : {})
       });
 
       const textToDom =
