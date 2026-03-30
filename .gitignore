@@ -1,5 +1,6 @@
 node_modules/
 CLAUDE.md
+factory_extensions/CLAUDE.md
 .claude/
 __tests__/
 later_stuff/
