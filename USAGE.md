@@ -87,7 +87,7 @@ Rules only need to be sent once at the start of an AI session. Use `copy all sta
 when [r] pressed                         ← export IR (no rules needed after first prompt)
   textify clicked block to clipboard
 
-when [p] pressed                         ← render AI output visually
+when [t] pressed                         ← render AI output visually
   Blockify clipboard contents
 ```
 
