@@ -10,8 +10,6 @@
   let lastExportText = '';
   globalThis.__TEXTIFY_SHARED__ = { lastExportText: '' };
 
-  const IR_SPEC_HEADER = '# Textify Canon IR — spec: https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/IR_GRAMMAR.md';
-
   const AI_MUTATION_RULES = `You are modifying Textify canon IR.
 
 Before responding, fetch and read the full grammar specification at:
@@ -714,17 +712,6 @@ IR:
             text: 'Textify clicked block'
           },
           {
-            opcode: 'copyAllStacksToClipboard',
-            blockType: Scratch.BlockType.COMMAND,
-            text: 'copy all stacks from sprite [SPRITE] to clipboard with rules',
-            arguments: {
-              SPRITE: {
-                type: Scratch.ArgumentType.STRING,
-                defaultValue: 'Sprite1'
-              }
-            }
-          },
-          {
             opcode: 'copyAllStacksPlain',
             blockType: Scratch.BlockType.COMMAND,
             text: 'copy all stacks from sprite [SPRITE] without rules',
@@ -764,19 +751,6 @@ IR:
         ir = serializeNode(target, blockId);
       }
 
-      lastExportText = ir;
-      globalThis.__TEXTIFY_SHARED__.lastExportText = ir;
-      await copyTextToClipboard(ir);
-    }
-
-    async copyAllStacksToClipboard(args, util) {
-      const target = getTargetByName(args.SPRITE);
-      if (!target) {
-        lastExportText = `Sprite not found: ${args.SPRITE}`;
-        return;
-      }
-      const excludeId = util && util.thread && util.thread.topBlock;
-      const ir = exportAllStacksText(target, excludeId);
       lastExportText = ir;
       globalThis.__TEXTIFY_SHARED__.lastExportText = ir;
       await copyTextToClipboard(ir);

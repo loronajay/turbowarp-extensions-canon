@@ -46,9 +46,7 @@ File: [textify-turbowarp.js](textify_and_blockify/textify-turbowarp.js)
 
 `FOR CUSTOM BLOCKS/STACKS`: click on just the custom block header to textify just the header. click on the stack to retrieve the header + the stack.
 
-- **`copy all stacks from sprite [SPRITE] to clipboard with rules`** — exports all top-level stacks from a named sprite as `[script]` IR with spec header; procedure definitions excluded; the running script excludes itself via `util.thread.topBlock`
-
-- **`copy all stacks from sprite [SPRITE] without rules`** — same as above, no spec header (for debugging); also self-excluding
+- **`copy all stacks from sprite [SPRITE] without rules`** — exports all top-level stacks from a named sprite as `[script]` IR; procedure definitions excluded; the running script excludes itself via `util.thread.topBlock`
 
 - **`merge rules with clipboard IR`** — reads IR from clipboard, strips any spec header, prepends canonical AI mutation rules, copies merged payload back to clipboard; copies `no copied IR` if clipboard does not contain valid IR
 
@@ -131,7 +129,7 @@ Coverage currently includes:
 - Textify block registration (all remaining blocks)
 - `getStackRoot` helper (next-chain, SUBSTACK, reporter, detached, unknown)
 - `exportAllStacksText` (empty target, single stack, multi-stack, procedure exclusion, self-exclusion)
-- `copyAllStacksToClipboard` / `copyAllStacksPlain` (sprite lookup, clipboard payload, shared state, self-exclusion via util)
+- `copyAllStacksPlain` (sprite lookup, clipboard payload, shared state, self-exclusion via util)
 - `getExportedIR` reporter
 - `textifyClickedBlock` (graceful no-op when ScratchBlocks unavailable)
 - Textify/Blockify shared state bridge (`__TEXTIFY_SHARED__`)

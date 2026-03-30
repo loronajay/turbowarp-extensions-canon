@@ -18,7 +18,7 @@ Scratch project → [Textify] → Textify IR → [AI model] → [Blockify] → S
 
 ## Textify Canon IR
 
-Textify Canon IR is the canonical text representation of Scratch/TurboWarp block programs used by this pipeline. IR snippets exported by Textify can include a spec header pointing to the grammar document. The `copy all stacks with rules` export block and the `merge rules with clipboard IR` block both prepend this header:
+Textify Canon IR is the canonical text representation of Scratch/TurboWarp block programs used by this pipeline. The `merge rules with clipboard IR` block prepends the AI mutation rules (including the grammar spec URL) to whatever IR is on the clipboard:
 
 ```
 # Textify Canon IR — spec: https://raw.githubusercontent.com/loronajay/textify-blockify-IR/main/IR_GRAMMAR.md
@@ -77,14 +77,13 @@ This document defines all node types (`procedure`, `script`, `stack`, `opcode`, 
 
 ## Starting a new project
 
-You don't need existing blocks to use the AI workflow. In TurboWarp, place a green flag hat block (`when flag clicked`) by itself, use Textify's **`copy all stacks from sprite [SPRITE] to clipboard with rules`** block to export it, then paste the clipboard into your AI chat and describe the game or feature you want to build. Copy the model's IR output to your clipboard, then click Blockify's **`Blockify clipboard contents`** block to render it as Scratch blocks.
+You don't need existing blocks to use the AI workflow. In TurboWarp, place a green flag hat block (`when flag clicked`) by itself, use Textify's **`copy all stacks from sprite [SPRITE] without rules`** block followed by **`merge rules with clipboard IR`** to export it with mutation rules, then paste the clipboard into your AI chat and describe the game or feature you want to build. Copy the model's IR output to your clipboard, then click Blockify's **`Blockify clipboard contents`** block to render it as Scratch blocks.
 
 ## AI Mutation Workflow
 
 1. In Scratch/TurboWarp, use one of Textify's export blocks:
-   - **`copy all stacks from sprite [SPRITE] to clipboard with rules`** — exports every top-level stack from a sprite with mutation rules prepended; paste directly into your AI chat
-   - **`textify clicked block to clipboard`** — click any block to export its whole stack as IR (no rules); follow with `merge rules with clipboard IR` before pasting
-   - **`copy all stacks from sprite [SPRITE] without rules`** — same as above, no rules; follow with `merge rules with clipboard IR` before pasting
+   - **`copy all stacks from sprite [SPRITE] without rules`** — exports every top-level stack from a sprite; follow with `merge rules with clipboard IR` before pasting
+   - **`textify clicked block to clipboard`** — click any block to export its whole stack as IR; follow with `merge rules with clipboard IR` before pasting
 2. Paste into an AI model (Gemini, ChatGPT, Claude, etc.)
 4. The model fetches `IR_GRAMMAR.md`, echoes the IR back, then waits for your mutation request
 5. Paste the model's output back into Blockify's Source IR pane to preview and validate

@@ -4,7 +4,7 @@ This doc covers how to load both extensions and use the AI mutation workflow end
 
 ## Starting a new project
 
-You don't need existing blocks to use the AI workflow. In TurboWarp, place a green flag hat block (`when flag clicked`) by itself, use Textify's **`copy all stacks from sprite [SPRITE] to clipboard with rules`** block to export it, then paste the clipboard into your AI chat and describe the game or feature you want to build. Copy the model's IR output to your clipboard, then click Blockify's **`Blockify clipboard contents`** block to render it as Scratch blocks.
+You don't need existing blocks to use the AI workflow. In TurboWarp, place a green flag hat block (`when flag clicked`) by itself, use Textify's **`copy all stacks from sprite [SPRITE] without rules`** block followed by **`merge rules with clipboard IR`** to export it with mutation rules, then paste the clipboard into your AI chat and describe the game or feature you want to build. Copy the model's IR output to your clipboard, then click Blockify's **`Blockify clipboard contents`** block to render it as Scratch blocks.
 
 ## Loading the extensions
 
@@ -30,14 +30,11 @@ Cancel the click by right-clicking, pressing Escape, or clicking the Cancel butt
 
 | Block | What it does |
 |---|---|
-| `copy all stacks from sprite [SPRITE] to clipboard with rules` | Copies IR for every top-level stack, with spec header |
-| `copy all stacks from sprite [SPRITE] without rules` | Same IR, no spec header (useful for debugging) |
+| `copy all stacks from sprite [SPRITE] without rules` | Copies IR for every top-level stack |
 
 Procedure definition blocks are excluded from both. All exported IR is stored in `__TEXTIFY_SHARED__` so Blockify can read it.
 
 ## Sending IR to an AI model
-
-**`copy all stacks with rules`** already includes the mutation rules — paste directly into your AI chat. No extra step needed.
 
 **`textify clicked block`** and **`copy all stacks without rules`** do not include rules. Follow them with **`merge rules with clipboard IR`** before pasting:
 
@@ -81,7 +78,7 @@ The **`last Blockify error`** block returns the most recent error string if you 
 
 ## Recommended script layout
 
-Rules only need to be sent once at the start of an AI session. Use `copy all stacks with rules` (or `merge rules with clipboard IR`) for your first prompt to give the model the grammar and mutation rules. After that, just export and paste IR directly — the model already has context.
+Rules only need to be sent once at the start of an AI session. Use `merge rules with clipboard IR` for your first prompt to give the model the grammar and mutation rules. After that, just export and paste IR directly — the model already has context.
 
 ```
 when [r] pressed                         ← export IR (no rules needed after first prompt)
