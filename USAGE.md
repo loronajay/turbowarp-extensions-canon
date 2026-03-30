@@ -96,6 +96,5 @@ when [t] pressed                         ← render AI output visually
 | Block | Returns |
 |---|---|
 | `clipboard contents` | the current clipboard text |
-| `clipboard IR matches buffer?` | `true` if clipboard IR matches the loaded buffer |
 | `last Blockify error` | last parse/validation error message, or empty |
 | `clipboard IR` (Textify) | the last IR exported in this session |
