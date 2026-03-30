@@ -1184,11 +1184,13 @@
   }
 
   function astToScratchBlocksXmlMulti(nodes, margin = 400) {
-    let allVarsXml = '';
+    const allVars = new Map();
     let allBlocksXml = '';
     let xOffset = 0;
     for (const node of nodes) {
-      allVarsXml += variablesXml(node);
+      for (const [key, variable] of collectDeclaredVariables(node)) {
+        allVars.set(key, variable);
+      }
       let blockXml;
       if (node.type === 'script') {
         blockXml = stackChainXml(node.body);
@@ -1202,6 +1204,10 @@
       allBlocksXml += blockXml;
       xOffset += margin;
     }
+    const vars = Array.from(allVars.values()).sort((a, b) => a.type.localeCompare(b.type) || a.name.localeCompare(b.name));
+    const allVarsXml = vars.length
+      ? `<variables>${vars.map(v => `<variable type="${escapeXmlAttr(v.type)}" id="${escapeXmlAttr(variableIdFor(v.name, v.type))}">${escapeXmlText(v.name)}</variable>`).join('')}</variables>`
+      : '';
     return `<xml xmlns="https://developers.google.com/blockly/xml">${allVarsXml}${allBlocksXml}</xml>`;
   }
 

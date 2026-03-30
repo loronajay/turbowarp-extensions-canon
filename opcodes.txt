@@ -58,6 +58,9 @@
     sound_setvolumeto: { shape: 'command', category: 'sound', tokens: ['set volume to', { input: 'VOLUME', shape: 'round' }, '%'] },
     sound_volume: { shape: 'reporter-round', category: 'sound', tokens: ['volume'] },
 
+    // control_if, control_if_else, control_repeat, control_forever, control_wait_until,
+    // and control_repeat_until are NOT in VISUAL_OPCODE_SPECS — they are handled by the
+    // dedicated renderKnownControlOpcode() switch which builds C-block HTML directly.
     control_wait: { shape: 'command', category: 'control', tokens: ['wait', { input: 'DURATION', shape: 'round' }, 'seconds'] },
     control_stop: { shape: 'command', category: 'control', tokens: ['stop', { field: 'STOP_OPTION' }] },
     control_create_clone_of: { shape: 'command', category: 'control', tokens: ['create clone of', { slot: ['CLONE_OPTION'], shape: 'round' }] },
@@ -130,8 +133,23 @@
     pen_setPenSizeTo: { shape: 'command', category: 'pen', tokens: ['set pen size to', { input: 'SIZE', shape: 'round' }] },
 
     argument_reporter_string_number: { shape: 'reporter-round', category: 'custom', tokens: [{ field: 'VALUE' }] },
-    argument_reporter_boolean: { shape: 'reporter-boolean', category: 'custom', tokens: [{ field: 'VALUE' }] }
+    argument_reporter_boolean: { shape: 'reporter-boolean', category: 'custom', tokens: [{ field: 'VALUE' }] },
+
+    blockifyphase1_editIRBuffer: { shape: 'command', category: 'custom', tokens: ['open Blockify IR editor'] },
+    blockifyphase1_loadClipboardIR: { shape: 'command', category: 'custom', tokens: ['Blockify clipboard contents'] },
+    blockifyphase1_readClipboard: { shape: 'reporter-round', category: 'custom', tokens: ['clipboard contents'] },
+    blockifyphase1_getLastError: { shape: 'reporter-round', category: 'custom', tokens: ['last Blockify error'] },
+
+    textifyturbowarp_getExportedIR: { shape: 'reporter-round', category: 'custom', tokens: ['clipboard IR'] },
+    textifyturbowarp_copyRulesWithClipboardIR: { shape: 'command', category: 'custom', tokens: ['merge rules with clipboard IR'] },
+    textifyturbowarp_textifyClickedBlock: { shape: 'command', category: 'custom', tokens: ['Textify clicked block'] },
+    textifyturbowarp_copyAllStacksPlain: { shape: 'command', category: 'custom', tokens: ['copy all stacks from sprite', { input: 'SPRITE', shape: 'round' }, 'without rules'] }
   };
+
+  // C-block control opcodes are handled by renderKnownControlOpcode() instead of
+  // VISUAL_OPCODE_SPECS — they generate full C-shaped HTML directly:
+  //   control_if, control_if_else, control_repeat, control_forever,
+  //   control_wait_until, control_repeat_until
 
   const MENU_FIELD_NAME_BY_OPCODE = {
     motion_goto_menu: 'TO',
@@ -154,13 +172,6 @@
     BROADCAST_OPTION: 'broadcast_msg'
   };
 
-  function escapeString(value) {
-    return String(value ?? '')
-      .replace(/\\/g, '\\\\')
-      .replace(/"/g, '\\"')
-      .replace(/\n/g, '\\n');
-  }
-
   const DYNAMIC_MENU_OUTPUT_SPECS = {
     motion_goto_menu: { fieldName: 'TO', categoryExtension: 'colours_motion' },
     motion_glideto_menu: { fieldName: 'TO', categoryExtension: 'colours_motion' },
@@ -173,5 +184,3 @@
     sensing_of_object_menu: { fieldName: 'OBJECT', categoryExtension: 'colours_sensing' },
     control_create_clone_of_menu: { fieldName: 'CLONE_OPTION', categoryExtension: 'colours_control' }
   };
-
-

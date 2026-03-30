@@ -23397,11 +23397,13 @@ def ${E4.FUNCTION_NAME_PLACEHOLDER_}(text):
       return `<xml xmlns="https://developers.google.com/blockly/xml">${variableDeclarations}<block type="procedures_definition"><statement name="custom_block"><block type="procedures_prototype">${procedureMutationXml(node)}</block></statement>${nextXml}</block></xml>`;
     }
     function astToScratchBlocksXmlMulti(nodes, margin = 400) {
-      let allVarsXml = "";
+      const allVars = /* @__PURE__ */ new Map();
       let allBlocksXml = "";
       let xOffset = 0;
       for (const node of nodes) {
-        allVarsXml += variablesXml(node);
+        for (const [key, variable] of collectDeclaredVariables(node)) {
+          allVars.set(key, variable);
+        }
         let blockXml;
         if (node.type === "script") {
           blockXml = stackChainXml(node.body);
@@ -23414,6 +23416,8 @@ def ${E4.FUNCTION_NAME_PLACEHOLDER_}(text):
         allBlocksXml += blockXml;
         xOffset += margin;
       }
+      const vars = Array.from(allVars.values()).sort((a2, b2) => a2.type.localeCompare(b2.type) || a2.name.localeCompare(b2.name));
+      const allVarsXml = vars.length ? `<variables>${vars.map((v2) => `<variable type="${escapeXmlAttr(v2.type)}" id="${escapeXmlAttr(variableIdFor(v2.name, v2.type))}">${escapeXmlText(v2.name)}</variable>`).join("")}</variables>` : "";
       return `<xml xmlns="https://developers.google.com/blockly/xml">${allVarsXml}${allBlocksXml}</xml>`;
     }
     const SELF_EXTENSION_BLOCK_DEFS = [
