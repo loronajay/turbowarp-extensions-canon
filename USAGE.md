@@ -81,12 +81,13 @@ The **`last Blockify error`** block returns the most recent error string if you 
 
 ## Recommended script layout
 
-```
-when [r] pressed                         ← click-to-export + copy rules in one keypress
-  textify clicked block to clipboard
-  merge rules with clipboard IR
+Rules only need to be sent once at the start of an AI session. Use `copy all stacks with rules` (or `merge rules with clipboard IR`) for your first prompt to give the model the grammar and mutation rules. After that, just export and paste IR directly — the model already has context.
 
-when [p] pressed                         ← render clipboard IR visually
+```
+when [r] pressed                         ← export IR (no rules needed after first prompt)
+  textify clicked block to clipboard
+
+when [p] pressed                         ← render AI output visually
   Blockify clipboard contents
 ```
 
