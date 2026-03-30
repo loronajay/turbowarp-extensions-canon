@@ -75,6 +75,10 @@ This document defines all node types (`procedure`, `script`, `stack`, `opcode`, 
 
 > If you are an AI model working with Textify IR or Blockify IR, fetch and follow the grammar specification at the URL above before producing any output. Always produce canonical IR — parser tolerances are a safety net, not a license to deviate.
 
+## Starting a new project
+
+You don't need existing blocks to use the AI workflow. In TurboWarp, place a green flag hat block (`when flag clicked`) by itself, use Textify's **`copy all stacks from sprite [SPRITE] to clipboard with rules`** block to export it, then paste the clipboard into your AI chat and describe the game or feature you want to build. Copy the model's IR output to your clipboard, then click Blockify's **`Blockify clipboard contents`** block to render it as Scratch blocks.
+
 ## AI Mutation Workflow
 
 1. In Scratch/TurboWarp, use one of Textify's export blocks:
@@ -85,6 +89,7 @@ This document defines all node types (`procedure`, `script`, `stack`, `opcode`, 
 3. Paste into an AI model (Gemini, ChatGPT, Claude, etc.)
 4. The model fetches `IR_GRAMMAR.md`, echoes the IR back, then waits for your mutation request
 5. Paste the model's output back into Blockify's Source IR pane to preview and validate
+6. If Blockify shows a parse or render error, copy the error message and paste it back into the AI chat — the model will correct the IR. Multiple attempts are sometimes needed, but LLMs generally self-correct when given the exact error message.
 
 ## For AI Models
 

@@ -7,6 +7,21 @@ Textify Canon IR is a bracket-delimited text format representing Scratch/TurboWa
 
 ---
 
+## Common Mistakes — Read This First
+
+This format is **not JSON**. These are the most frequent errors:
+
+| Wrong | Right | Why |
+|---|---|---|
+| `{"opcode":"motion_movesteps","inputs":{"STEPS":10}}` | `[opcode:motion_movesteps id:"1" inputs:{STEPS:[literal:number:10]} fields:{} stacks:{}]` | Nodes use bracket syntax, not JSON objects |
+| `[literal:string:hello]` | `[literal:string:"hello"]` | String values must be double-quoted |
+| Substack placed in `inputs` | Substack placed in `stacks` | `inputs` is for value nodes only; `stacks` is for control block substacks |
+| `look_say` | `looks_say` | Opcode names are exact — no recovery for misspellings |
+
+Before returning any IR, verify: every root starts with `[` not `{`, all string literals are double-quoted, and all opcode names are exact.
+
+---
+
 ## Root
 
 A document is one or more root nodes. When producing IR, output one root per response unless explicitly asked for multiple. Blockify accepts multiple roots in one clipboard payload and renders each stack.

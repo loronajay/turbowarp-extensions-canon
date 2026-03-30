@@ -821,8 +821,8 @@
             arguments: {
               TEXT: {type: Scratch.ArgumentType.STRING, defaultValue: 'Score: 0'},
               ID: {type: Scratch.ArgumentType.STRING, defaultValue: 'scoreDisplay'},
-              X: {type: Scratch.ArgumentType.NUMBER, defaultValue: -220},
-              Y: {type: Scratch.ArgumentType.NUMBER, defaultValue: 150}
+              X: {type: Scratch.ArgumentType.NUMBER, defaultValue: 0},
+              Y: {type: Scratch.ArgumentType.NUMBER, defaultValue: 0}
             }
           },
           {
@@ -916,7 +916,7 @@
               ALIGNMENT: {
                 type: Scratch.ArgumentType.STRING,
                 menu: 'alignmentMenu',
-                defaultValue: 'left'
+                defaultValue: 'center'
               }
             }
           },
@@ -962,7 +962,43 @@
             text: 'set color of text [ID] to [COLOR]',
             arguments: {
               ID: {type: Scratch.ArgumentType.STRING, defaultValue: 'scoreDisplay'},
-              COLOR: {type: Scratch.ArgumentType.COLOR, defaultValue: '#ffffff'}
+              COLOR: {type: Scratch.ArgumentType.COLOR, defaultValue: '#000000'}
+            }
+          },
+          {
+            opcode: 'setColorAll',
+            blockType: Scratch.BlockType.COMMAND,
+            text: 'set color of all text to [COLOR]',
+            arguments: {
+              COLOR: {type: Scratch.ArgumentType.COLOR, defaultValue: '#000000'}
+            }
+          },
+          {
+            opcode: 'setScaleAll',
+            blockType: Scratch.BlockType.COMMAND,
+            text: 'set scale of all text to [SCALE]',
+            arguments: {
+              SCALE: {type: Scratch.ArgumentType.NUMBER, defaultValue: 1}
+            }
+          },
+          {
+            opcode: 'setAlignmentAll',
+            blockType: Scratch.BlockType.COMMAND,
+            text: 'set alignment of all text to [ALIGNMENT]',
+            arguments: {
+              ALIGNMENT: {
+                type: Scratch.ArgumentType.STRING,
+                menu: 'alignmentMenu',
+                defaultValue: 'left'
+              }
+            }
+          },
+          {
+            opcode: 'setLetterSpacingAll',
+            blockType: Scratch.BlockType.COMMAND,
+            text: 'set letter spacing of all text to [SPACING]',
+            arguments: {
+              SPACING: {type: Scratch.ArgumentType.NUMBER, defaultValue: 0}
             }
           },
 
@@ -1298,11 +1334,6 @@
       const obj = this._ensureObject(args.ID);
       if (!obj) return;
 
-      obj.alignment = DEFAULT_ALIGNMENT;
-      obj.scale = DEFAULT_SCALE;
-      obj.letterSpacing = DEFAULT_LETTER_SPACING;
-      obj.color = DEFAULT_COLOR;
-
       obj.text = this._normalizeText(args.TEXT);
       obj.x = Scratch.Cast.toNumber(args.X);
       obj.y = Scratch.Cast.toNumber(args.Y);
@@ -1439,6 +1470,30 @@
       if (!obj) return;
 
       obj.color = this._normalizeColor(args.COLOR);
+      this._refresh();
+    }
+
+    setColorAll(args) {
+      const color = this._normalizeColor(args.COLOR);
+      for (const obj of this.textObjects.values()) obj.color = color;
+      this._refresh();
+    }
+
+    setScaleAll(args) {
+      const scale = this._normalizeScale(args.SCALE);
+      for (const obj of this.textObjects.values()) obj.scale = scale;
+      this._refresh();
+    }
+
+    setAlignmentAll(args) {
+      const alignment = this._normalizeAlignment(args.ALIGNMENT);
+      for (const obj of this.textObjects.values()) obj.alignment = alignment;
+      this._refresh();
+    }
+
+    setLetterSpacingAll(args) {
+      const spacing = this._normalizeSpacing(args.SPACING);
+      for (const obj of this.textObjects.values()) obj.letterSpacing = spacing;
       this._refresh();
     }
 

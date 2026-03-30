@@ -346,6 +346,8 @@ These failure modes have been observed across multiple models and are worth chec
 
 **Unintended structural changes** — models may add or remove blocks not mentioned in the mutation request. The mutation rules require preserving all unrelated structure, but this should be verified in Blockify after applying any AI-produced IR.
 
+**Recovering from parse or render errors** — if Blockify shows an error, copy the error message and paste it back into the AI chat. LLMs will generally correct the IR when given the exact error text. Multiple attempts are sometimes needed.
+
 ---
 
 ## Parser Tolerances

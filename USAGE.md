@@ -2,6 +2,10 @@
 
 This doc covers how to load both extensions and use the AI mutation workflow end-to-end.
 
+## Starting a new project
+
+You don't need existing blocks to use the AI workflow. In TurboWarp, place a green flag hat block (`when flag clicked`) by itself, use Textify's **`copy all stacks from sprite [SPRITE] to clipboard with rules`** block to export it, then paste the clipboard into your AI chat and describe the game or feature you want to build. Copy the model's IR output to your clipboard, then click Blockify's **`Blockify clipboard contents`** block to render it as Scratch blocks.
+
 ## Loading the extensions
 
 In TurboWarp, load both extensions as **unsandboxed** custom extensions:
@@ -74,6 +78,12 @@ If no valid IR has been exported yet, the block copies `no copied IR` instead.
 ## Visualising AI output in Blockify
 
 After the AI returns edited IR, use Blockify's **`Blockify clipboard contents`** block to render it visually. Paste the AI output to clipboard first, then run the block — it opens a floating panel with the scratch-blocks visual render of all stacks in the clipboard.
+
+## Correcting IR errors
+
+If Blockify fails to parse or render the AI's output, it displays an error message in the panel. Copy that error and paste it back into the AI chat — the model will correct the IR. Multiple attempts are sometimes needed, but LLMs generally fix grammar issues when given the exact error message.
+
+The **`last Blockify error`** block returns the most recent error string if you need it from a script rather than copying from the panel directly.
 
 ## Recommended script layout
 

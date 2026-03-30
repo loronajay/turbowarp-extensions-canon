@@ -2,14 +2,14 @@
   'use strict';
 
   if (!Scratch.extensions.unsandboxed) {
-    throw new Error('Factory Gravity v1 must run unsandboxed.');
+    throw new Error('Factory Physics must run unsandboxed.');
   }
 
   const vm = Scratch.vm;
   const runtime = vm.runtime;
   const Cast = Scratch.Cast;
 
-  class FactoryGravityV1 {
+  class FactoryPhysics {
     constructor() {
       // body registry keyed by exact sprite name
       this.bodies = new Map();
@@ -17,8 +17,8 @@
 
     getInfo() {
       return {
-        id: 'factorygravityv1',
-        name: 'Factory Gravity v1',
+        id: 'factoryphysics',
+        name: 'Factory Physics',
         color1: '#4C97FF',
         color2: '#3373CC',
         color3: '#2E64B5',
@@ -206,6 +206,22 @@
                 type: Scratch.ArgumentType.STRING,
                 menu: 'spriteMenu',
                 defaultValue: 'Sprite1'
+              }
+            }
+          },
+          {
+            opcode: 'setStepHeight',
+            blockType: Scratch.BlockType.COMMAND,
+            text: 'set step height of [NAME] to [VALUE]',
+            arguments: {
+              NAME: {
+                type: Scratch.ArgumentType.STRING,
+                menu: 'spriteMenu',
+                defaultValue: 'Sprite1'
+              },
+              VALUE: {
+                type: Scratch.ArgumentType.NUMBER,
+                defaultValue: 6
               }
             }
           },
@@ -439,7 +455,8 @@
         rightWall: false,
         ceiling: false,
         coyoteTicks: 0,
-        coyoteTime: 4
+        coyoteTime: 4,
+        stepHeight: 6
       };
 
       this.bodies.set(key, body);
@@ -508,7 +525,7 @@
       body.ceiling = false;
     }
 
-    _moveX(body, amount) {
+    _moveX(body, amount, wasGrounded = false) {
       const target = this._refreshBodyTarget(body);
       if (!target) return;
 
@@ -517,12 +534,23 @@
 
       const wholeSteps = Math.floor(total);
       const remainder = total - wholeSteps;
+      const stepHeight = body.stepHeight || 6;
 
       const tryStep = stepAmount => {
         const pos = this._getXY(target);
         this._setXY(target, pos.x + stepAmount, pos.y);
 
         if (this._touchingSolid(body)) {
+          if (wasGrounded) {
+            // Try stepping up over slope or ledge
+            for (let up = 1; up <= stepHeight; up++) {
+              this._setXY(target, pos.x + stepAmount, pos.y + up);
+              if (!this._touchingSolid(body)) {
+                return true; // Climbed up successfully
+              }
+            }
+          }
+          // Can't move or step — wall collision
           this._setXY(target, pos.x, pos.y);
           body.xVel = 0;
 
@@ -582,15 +610,50 @@
       }
     }
 
+    _depenetrate(body) {
+      const target = this._refreshBodyTarget(body);
+      if (!target || !this._touchingSolid(body)) return;
+
+      const maxPush = 32;
+      const pos = this._getXY(target);
+
+      // Try each cardinal direction; up first since floor overlap is most common
+      const directions = [
+        { dx: 0, dy: 1 },
+        { dx: 0, dy: -1 },
+        { dx: 1, dy: 0 },
+        { dx: -1, dy: 0 }
+      ];
+
+      for (const { dx, dy } of directions) {
+        for (let dist = 1; dist <= maxPush; dist++) {
+          this._setXY(target, pos.x + dx * dist, pos.y + dy * dist);
+          if (!this._touchingSolid(body)) return;
+        }
+        this._setXY(target, pos.x, pos.y);
+      }
+
+      // Could not depenetrate — restore original position
+      this._setXY(target, pos.x, pos.y);
+    }
+
     _groundProbe(body) {
       const target = this._refreshBodyTarget(body);
       if (!target) return;
 
       const pos = this._getXY(target);
-      this._setXY(target, pos.x, pos.y - 1);
+      // When not jumping, probe further down to stick to downward slopes
+      const probeDepth = body.yVel <= 0 ? Math.max(1, body.stepHeight || 6) : 1;
 
-      if (this._touchingSolid(body)) {
-        body.grounded = true;
+      for (let down = 1; down <= probeDepth; down++) {
+        this._setXY(target, pos.x, pos.y - down);
+        if (this._touchingSolid(body)) {
+          // Snap to just above the surface
+          this._setXY(target, pos.x, pos.y - down + 1);
+          body.grounded = true;
+          if (body.yVel < 0) body.yVel = 0;
+          return;
+        }
       }
 
       this._setXY(target, pos.x, pos.y);
@@ -684,6 +747,12 @@
       body.maxFall = Math.max(0, value);
     }
 
+    setStepHeight(args) {
+      const body = this._getOrCreateBody(args.NAME);
+      if (!body) return;
+      body.stepHeight = Math.max(0, this._toNumber(args.VALUE, 6));
+    }
+
     setGravitySettings(args) {
       const body = this._getOrCreateBody(args.NAME);
       if (!body) return;
@@ -733,6 +802,8 @@
 
       if (!target || !solidTarget || !body.solidName) return;
 
+      this._depenetrate(body);
+      const wasGrounded = body.grounded;
       this._resetContactStates(body);
 
       body.yVel += body.gravity;
@@ -742,7 +813,7 @@
       }
 
       if (body.xVel !== 0) {
-        this._moveX(body, body.xVel);
+        this._moveX(body, body.xVel, wasGrounded);
       }
 
       if (body.yVel !== 0) {
@@ -800,5 +871,5 @@
     }
   }
 
-  Scratch.extensions.register(new FactoryGravityV1());
+  Scratch.extensions.register(new FactoryPhysics());
 })(Scratch);
