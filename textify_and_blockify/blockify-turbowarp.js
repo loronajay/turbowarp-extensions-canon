@@ -1329,17 +1329,23 @@
     let xCursor = 20;
     for (const block of sorted) {
       if (typeof block.moveTo !== 'function') continue;
+
+      let blockWidth = 200;
       try {
-        block.moveTo(xCursor, 20);
-        let blockWidth = 200;
         if (typeof block.getBoundingRectangle === 'function') {
           const rect = block.getBoundingRectangle();
           if (rect && rect.topLeft && rect.bottomRight) {
             blockWidth = Math.max(100, rect.bottomRight.x - rect.topLeft.x);
           }
+        } else if (typeof block.getHeightWidth === 'function') {
+          const hw = block.getHeightWidth();
+          if (hw && hw.width) blockWidth = Math.max(100, hw.width);
         }
-        xCursor += blockWidth + gap;
-      } catch (e) { /* skip unmovable blocks */ }
+      } catch (e) { /* use default width */ }
+
+      try { block.moveTo(xCursor, 20); } catch (e) { /* skip unmovable blocks */ }
+
+      xCursor += blockWidth + gap;
     }
 
     try {

@@ -23528,18 +23528,24 @@ def ${E4.FUNCTION_NAME_PLACEHOLDER_}(text):
       let xCursor = 20;
       for (const block of sorted) {
         if (typeof block.moveTo !== "function") continue;
+        let blockWidth = 200;
         try {
-          block.moveTo(xCursor, 20);
-          let blockWidth = 200;
           if (typeof block.getBoundingRectangle === "function") {
             const rect = block.getBoundingRectangle();
             if (rect && rect.topLeft && rect.bottomRight) {
               blockWidth = Math.max(100, rect.bottomRight.x - rect.topLeft.x);
             }
+          } else if (typeof block.getHeightWidth === "function") {
+            const hw = block.getHeightWidth();
+            if (hw && hw.width) blockWidth = Math.max(100, hw.width);
           }
-          xCursor += blockWidth + gap;
         } catch (e3) {
         }
+        try {
+          block.moveTo(xCursor, 20);
+        } catch (e3) {
+        }
+        xCursor += blockWidth + gap;
       }
       try {
         if (typeof workspace.resizeContents === "function") workspace.resizeContents();
