@@ -6,7 +6,7 @@ A deterministic IR transformation engine for Scratch/TurboWarp block-based progr
 
 ## Live Demo
 
-[Play the Snake game](https://loronajay.github.io/textify-blockify-IR) — a Scratch game built using this pipeline with Google Gemini.
+[Play the Snake game](https://loronajay.github.io/textify-blockify-IR) — a Scratch game built using this pipeline with Google Gemini. Use WASD to move.
 
 ## Demo
 
