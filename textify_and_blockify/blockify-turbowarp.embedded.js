@@ -23527,22 +23527,26 @@ def ${E4.FUNCTION_NAME_PLACEHOLDER_}(text):
       });
       let xCursor = 20;
       for (const block of sorted) {
-        if (typeof block.moveTo !== "function") continue;
+        if (typeof block.moveBy !== "function") continue;
         let blockWidth = 200;
         try {
           if (typeof block.getBoundingRectangle === "function") {
             const rect = block.getBoundingRectangle();
-            if (rect && rect.topLeft && rect.bottomRight) {
+            if (rect != null && typeof rect.left === "number" && typeof rect.right === "number") {
+              blockWidth = Math.max(100, rect.right - rect.left);
+            } else if (rect != null && rect.topLeft && rect.bottomRight) {
               blockWidth = Math.max(100, rect.bottomRight.x - rect.topLeft.x);
             }
-          } else if (typeof block.getHeightWidth === "function") {
+          }
+          if (blockWidth === 200 && typeof block.getHeightWidth === "function") {
             const hw = block.getHeightWidth();
             if (hw && hw.width) blockWidth = Math.max(100, hw.width);
           }
         } catch (e3) {
         }
         try {
-          block.moveTo(xCursor, 20);
+          const pos = block.getRelativeToSurfaceXY();
+          block.moveBy(xCursor - pos.x, 20 - pos.y);
         } catch (e3) {
         }
         xCursor += blockWidth + gap;

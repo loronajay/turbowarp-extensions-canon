@@ -1328,22 +1328,32 @@
 
     let xCursor = 20;
     for (const block of sorted) {
-      if (typeof block.moveTo !== 'function') continue;
+      if (typeof block.moveBy !== 'function') continue;
 
+      // Measure width before moving (width is position-independent)
       let blockWidth = 200;
       try {
         if (typeof block.getBoundingRectangle === 'function') {
           const rect = block.getBoundingRectangle();
-          if (rect && rect.topLeft && rect.bottomRight) {
+          if (rect != null && typeof rect.left === 'number' && typeof rect.right === 'number') {
+            // scratch-blocks format: {top, bottom, left, right}
+            blockWidth = Math.max(100, rect.right - rect.left);
+          } else if (rect != null && rect.topLeft && rect.bottomRight) {
+            // Blockly format: {topLeft: {x,y}, bottomRight: {x,y}}
             blockWidth = Math.max(100, rect.bottomRight.x - rect.topLeft.x);
           }
-        } else if (typeof block.getHeightWidth === 'function') {
+        }
+        if (blockWidth === 200 && typeof block.getHeightWidth === 'function') {
           const hw = block.getHeightWidth();
           if (hw && hw.width) blockWidth = Math.max(100, hw.width);
         }
-      } catch (e) { /* use default width */ }
+      } catch (e) { /* use default */ }
 
-      try { block.moveTo(xCursor, 20); } catch (e) { /* skip unmovable blocks */ }
+      // moveBy(dx, dy) — move relative to current position
+      try {
+        const pos = block.getRelativeToSurfaceXY();
+        block.moveBy(xCursor - pos.x, 20 - pos.y);
+      } catch (e) { /* skip unmovable blocks */ }
 
       xCursor += blockWidth + gap;
     }
