@@ -29,7 +29,6 @@
     let connectionToken = 0;
     let _status = 'disconnected'; // 'disconnected' | 'connecting' | 'connected' | 'error'
     let _lastError = '';
-    let _lastRaw = '';
     let _searching = false;
     let _connected = false;
     let _clientId = '';
@@ -91,7 +90,7 @@
             case 'message':
                 _lastMsgType = String(msg.messageType || '');
                 _lastMsgValue = String(msg.value || '');
-                _lastMsgSender = String(msg.clientId || '');
+                _lastMsgSender = String(msg.senderId || '');
                 _messageFlag = true;
                 break;
             case 'error':
@@ -136,11 +135,6 @@
                         opcode: "lastError",
                         blockType: Scratch.BlockType.REPORTER,
                         text: "last connection error"
-                    },
-                    {
-                        opcode: "lastRaw",
-                        blockType: Scratch.BlockType.REPORTER,
-                        text: "last raw message"
                     },
 
                     // --- Rooms ---
@@ -271,7 +265,6 @@
             socket = new WebSocket(SERVER_URL);
             socket.onmessage = (event) => {
                 if (connectionToken !== token) return;
-                _lastRaw = String(event.data);
                 try { handleServerMessage(event.data); } catch (e) {}
             };
             socket.onclose = (event) => {
@@ -313,10 +306,6 @@
 
         lastError() {
             return _lastError;
-        }
-
-        lastRaw() {
-            return _lastRaw;
         }
 
         createRoom() {
