@@ -88,6 +88,18 @@ when [t] pressed                         ← render AI output visually
   Blockify clipboard contents
 ```
 
+## Visual render coverage
+
+Blockify renders blocks visually using an embedded scratch-blocks renderer. Coverage depends on whether the block type is known:
+
+| Block type | Render mode |
+|---|---|
+| Standard Scratch opcodes (motion, looks, sound, events, control, sensing, operators, data, pen) | Full visual (scratch-blocks) |
+| Blockify and Textify extension blocks | Full visual (scratch-blocks) |
+| Any other third-party extension blocks | HTML fallback renderer |
+
+The HTML fallback renderer still shows correct block shapes and structure — it just uses styled HTML elements instead of scratch-blocks visuals. If you're working in a project that uses other TurboWarp extensions (factory extensions, etc.) and export those stacks, those blocks will appear in fallback style while the rest of the stack renders normally.
+
 ## Utility blocks
 
 | Block | Returns |

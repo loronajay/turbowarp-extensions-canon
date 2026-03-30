@@ -65,6 +65,7 @@ File: [blockify-turbowarp.js](textify_and_blockify/blockify-turbowarp.js)
 - string literals render as orange variable-style reporter blocks in the visual renderer
 - visual render fallback renderer
 - embedded `scratch-blocks` renderer path
+- **render coverage**: full visual rendering (scratch-blocks) for all standard Scratch opcodes and for Blockify/Textify extension blocks; all other third-party extension blocks (factory extensions, etc.) use the HTML fallback renderer
 - clipboard preview window with IR editor (`Source IR` pane) and visual preview
 - button row pinned at the bottom of the editor
 - **`Blockify clipboard contents`** command block: loads clipboard IR and renders all block stacks in it

@@ -926,7 +926,17 @@
     pen_setPenSizeTo: { shape: 'command', category: 'pen', tokens: ['set pen size to', { input: 'SIZE', shape: 'round' }] },
 
     argument_reporter_string_number: { shape: 'reporter-round', category: 'custom', tokens: [{ field: 'VALUE' }] },
-    argument_reporter_boolean: { shape: 'reporter-boolean', category: 'custom', tokens: [{ field: 'VALUE' }] }
+    argument_reporter_boolean: { shape: 'reporter-boolean', category: 'custom', tokens: [{ field: 'VALUE' }] },
+
+    blockifyphase1_editIRBuffer: { shape: 'command', category: 'custom', tokens: ['open Blockify IR editor'] },
+    blockifyphase1_loadClipboardIR: { shape: 'command', category: 'custom', tokens: ['Blockify clipboard contents'] },
+    blockifyphase1_readClipboard: { shape: 'reporter-round', category: 'custom', tokens: ['clipboard contents'] },
+    blockifyphase1_getLastError: { shape: 'reporter-round', category: 'custom', tokens: ['last Blockify error'] },
+
+    textifyturbowarp_getExportedIR: { shape: 'reporter-round', category: 'custom', tokens: ['clipboard IR'] },
+    textifyturbowarp_copyRulesWithClipboardIR: { shape: 'command', category: 'custom', tokens: ['merge rules with clipboard IR'] },
+    textifyturbowarp_textifyClickedBlock: { shape: 'command', category: 'custom', tokens: ['Textify clicked block'] },
+    textifyturbowarp_copyAllStacksPlain: { shape: 'command', category: 'custom', tokens: ['copy all stacks from sprite', { input: 'SPRITE', shape: 'round' }, 'without rules'] }
   };
 
   const MENU_FIELD_NAME_BY_OPCODE = {
@@ -1195,6 +1205,46 @@
     return `<xml xmlns="https://developers.google.com/blockly/xml">${allVarsXml}${allBlocksXml}</xml>`;
   }
 
+  const SELF_EXTENSION_BLOCK_DEFS = [
+    { opcode: 'blockifyphase1_editIRBuffer',             text: 'open Blockify IR editor',                              shape: 'command'   },
+    { opcode: 'blockifyphase1_loadClipboardIR',          text: 'Blockify clipboard contents',                          shape: 'command'   },
+    { opcode: 'blockifyphase1_readClipboard',            text: 'clipboard contents',                                   shape: 'reporter'  },
+    { opcode: 'blockifyphase1_getLastError',             text: 'last Blockify error',                                  shape: 'reporter'  },
+    { opcode: 'textifyturbowarp_getExportedIR',          text: 'clipboard IR',                                         shape: 'reporter'  },
+    { opcode: 'textifyturbowarp_copyRulesWithClipboardIR', text: 'merge rules with clipboard IR',                      shape: 'command'   },
+    { opcode: 'textifyturbowarp_textifyClickedBlock',    text: 'Textify clicked block',                                shape: 'command'   },
+    { opcode: 'textifyturbowarp_copyAllStacksPlain',     text: 'copy all stacks from sprite %1 without rules',        shape: 'command', inputs: [{ type: 'input_value', name: 'SPRITE' }] }
+  ];
+
+  function registerSelfExtensionBlocks(scratchBlocks) {
+    if (!scratchBlocks || !scratchBlocks.Blocks) return;
+    for (const def of SELF_EXTENSION_BLOCK_DEFS) {
+      if (scratchBlocks.Blocks[def.opcode] && typeof scratchBlocks.Blocks[def.opcode].init === 'function') continue;
+      const isCommand = def.shape === 'command';
+      const text = def.text;
+      const inputs = def.inputs || null;
+      scratchBlocks.Blocks[def.opcode] = {
+        init: function () {
+          if (typeof this.jsonInit === 'function') {
+            const json = { message0: text };
+            if (inputs) json.args0 = inputs;
+            if (isCommand) { json.previousStatement = null; json.nextStatement = null; }
+            else { json.output = 'String'; }
+            this.jsonInit(json);
+            return;
+          }
+          if (typeof this.appendDummyInput === 'function') this.appendDummyInput().appendField(text);
+          if (isCommand) {
+            if (typeof this.setPreviousStatement === 'function') this.setPreviousStatement(true);
+            if (typeof this.setNextStatement === 'function') this.setNextStatement(true);
+          } else {
+            if (typeof this.setOutput === 'function') this.setOutput(true, 'String');
+          }
+        }
+      };
+    }
+  }
+
   function registerDynamicMenuOutputBlocks(scratchBlocks) {
     if (!scratchBlocks || !scratchBlocks.Blocks) return;
 
@@ -1241,6 +1291,7 @@
 
     if (!scratchBlocks.__blockifyPreviewInitialized) {
       registerDynamicMenuOutputBlocks(scratchBlocks);
+      registerSelfExtensionBlocks(scratchBlocks);
 
       if (typeof scratchBlocks.installAllBlocks === 'function') {
         scratchBlocks.installAllBlocks();
