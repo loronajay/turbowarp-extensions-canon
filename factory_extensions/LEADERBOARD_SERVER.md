@@ -36,7 +36,9 @@ JayLeaderboard.deviceType()
 
 ## Extension Status
 
-The 4 cloud sync blocks are implemented in `factory-leaderboards.js`:
+All leaderboard blocks are implemented in `factory-leaderboards.js`.
+
+**Cloud sync (4 blocks):**
 
 | Block | Opcode | Status |
 |---|---|---|
@@ -44,6 +46,8 @@ The 4 cloud sync blocks are implemented in `factory-leaderboards.js`:
 | `submit to cloud player [P] score [V]` | `submitToCloud` | Done |
 | `fetch top [N] scores from cloud into leaderboard [NAME]` | `fetchFromCloud` | Done |
 | `cloud sync status` | `cloudSyncStatus` | Done |
+
+**Name entry (6 blocks):** arcade-style letter picker, A–Z + 0–9 + space, 1–7 characters. See `NAME_ENTRY.md` for the full block reference and wiring guide.
 
 ---
 
