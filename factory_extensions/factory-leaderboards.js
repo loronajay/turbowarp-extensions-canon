@@ -5,6 +5,16 @@
         throw new Error("Factory Leaderboards must run unsandboxed");
     }
 
+    // TEMP TEST SHIM — remove before shipping
+    if (typeof JayLeaderboard === "undefined") {
+        window.JayLeaderboard = {
+            submit: (playerName, score) => { console.log("[LeaderboardTest] submit:", playerName, score); return Promise.resolve({ ok: true }); },
+            getTop: (limit = 10) => { console.log("[LeaderboardTest] getTop:", limit); return Promise.resolve([{rank:1,playerName:"AAA",score:9999},{rank:2,playerName:"BBB",score:8888},{rank:3,playerName:"CCC",score:7777}]); },
+            deviceType: () => "desktop"
+        };
+    }
+    // END TEMP TEST SHIM
+
     const boards = {};
 
     const NAME_ENTRY_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ";
