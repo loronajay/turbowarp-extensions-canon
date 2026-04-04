@@ -39,6 +39,10 @@
     }
 
     class FactoryLeaderboards {
+        constructor() {
+            this._syncStatus = "idle";
+        }
+
         getInfo() {
             return {
                 id: "factoryleaderboards",
@@ -189,6 +193,36 @@
                         arguments: {
                             NAME: { type: Scratch.ArgumentType.STRING, defaultValue: "High Scores" }
                         }
+                    },
+
+                    // Cloud Sync
+                    {
+                        opcode: "cloudAvailable",
+                        blockType: Scratch.BlockType.BOOLEAN,
+                        text: "cloud leaderboard available ?"
+                    },
+                    {
+                        opcode: "submitToCloud",
+                        blockType: Scratch.BlockType.COMMAND,
+                        text: "submit to cloud player [PLAYER] score [VALUE]",
+                        arguments: {
+                            PLAYER: { type: Scratch.ArgumentType.STRING, defaultValue: "AAA" },
+                            VALUE: { type: Scratch.ArgumentType.NUMBER, defaultValue: 100 }
+                        }
+                    },
+                    {
+                        opcode: "fetchFromCloud",
+                        blockType: Scratch.BlockType.COMMAND,
+                        text: "fetch top [LIMIT] scores from cloud into leaderboard [NAME]",
+                        arguments: {
+                            LIMIT: { type: Scratch.ArgumentType.NUMBER, defaultValue: 10 },
+                            NAME: { type: Scratch.ArgumentType.STRING, defaultValue: "High Scores" }
+                        }
+                    },
+                    {
+                        opcode: "cloudSyncStatus",
+                        blockType: Scratch.BlockType.REPORTER,
+                        text: "cloud sync status"
                     }
                 ],
                 menus: {
@@ -307,6 +341,43 @@
         hasEntries({ NAME }) {
             const board = getBoard(NAME);
             return !!(board && board.entries.length > 0);
+        }
+
+        cloudAvailable() {
+            return typeof JayLeaderboard !== "undefined" && !!JayLeaderboard;
+        }
+
+        async submitToCloud({ PLAYER, VALUE }) {
+            if (typeof JayLeaderboard === "undefined") return;
+            this._syncStatus = "loading";
+            try {
+                await JayLeaderboard.submit(String(PLAYER), Number(VALUE) || 0);
+                this._syncStatus = "success";
+            } catch (e) {
+                this._syncStatus = "error";
+            }
+        }
+
+        async fetchFromCloud({ LIMIT, NAME }) {
+            if (typeof JayLeaderboard === "undefined") return;
+            this._syncStatus = "loading";
+            try {
+                const entries = await JayLeaderboard.getTop(Number(LIMIT) || 10);
+                const board = ensureBoard(NAME);
+                board.entries = [];
+                for (const entry of entries) {
+                    board.entries.push({ name: entry.playerName, value: Number(entry.score) || 0 });
+                    sortBoard(board);
+                    trimBoard(board);
+                }
+                this._syncStatus = "success";
+            } catch (e) {
+                this._syncStatus = "error";
+            }
+        }
+
+        cloudSyncStatus() {
+            return this._syncStatus;
         }
     }
 

@@ -7,7 +7,6 @@
 
   const vm = Scratch.vm;
   const runtime = vm.runtime;
-  const renderer = runtime.renderer;
 
   const GLYPH_W = 5;
   const GLYPH_H = 7;
@@ -1119,6 +1118,7 @@
     }
 
     _setupDrawable() {
+      const renderer = runtime.renderer;
       if (!renderer) return;
 
       const stage = this._ensureCanvasSize();
@@ -1147,6 +1147,7 @@
     }
 
     _pushCanvasToSkin() {
+      const renderer = runtime.renderer;
       if (!renderer || this.skinId === null) return;
 
       const stage = this._getStageMetrics();
@@ -1318,8 +1319,14 @@
     }
 
     _refresh() {
+      if (!runtime.renderer) return;
       this._ensureCanvasSize();
       this._setupDrawable();
+
+      const renderer = runtime.renderer;
+      if (this.drawableId !== null && renderer.setDrawableOrder) {
+        try { renderer.setDrawableOrder(this.drawableId, Infinity, 'sprite'); } catch (e) {}
+      }
 
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 

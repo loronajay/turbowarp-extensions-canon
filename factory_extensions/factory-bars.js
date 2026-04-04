@@ -268,6 +268,11 @@
             this._ensureCanvasSize();
             this._setupDrawable();
 
+            const renderer = runtime.renderer;
+            if (this.drawableId !== null && renderer.setDrawableOrder) {
+                try { renderer.setDrawableOrder(this.drawableId, Infinity, 'sprite'); } catch (e) {}
+            }
+
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
             for (const bar of this.bars.values()) {
